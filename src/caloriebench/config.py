@@ -35,7 +35,7 @@ class Estimate(BaseModel):
 
     image_tokens: int = 0
     text_tokens: int = 330
-    output_tokens: int = 350  # visible JSON answer
+    output_tokens: int = 300  # visible JSON answer
     reasoning_tokens: int = 0  # expected hidden reasoning/thinking tokens (billed as output)
 
 

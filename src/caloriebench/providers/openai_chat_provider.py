@@ -1,5 +1,5 @@
-"""OpenAI-compatible Chat Completions endpoints (xAI, OpenRouter, and anything else that
-speaks the /chat/completions dialect), via the official `openai` SDK with a base_url.
+"""OpenAI-compatible Chat Completions endpoints (OpenRouter, and anything else that speaks
+the /chat/completions dialect), via the official `openai` SDK with a base_url.
 
 Supported `params` in models.yaml:
   reasoning_effort: passed as `reasoning_effort` (only for models that accept it)
@@ -14,7 +14,7 @@ from __future__ import annotations
 import openai
 
 from ..prompt import OUTPUT_SCHEMA, SCHEMA_NAME
-from .base import Provider, ProviderError, ProviderResult, Usage, data_url
+from .base import Provider, ProviderError, ProviderResult, Usage, billable_output, data_url, dump_usage
 
 _FATAL = (openai.BadRequestError, openai.AuthenticationError, openai.PermissionDeniedError, openai.NotFoundError)
 
@@ -23,7 +23,7 @@ class OpenAIChatProvider(Provider):
     def __init__(self, spec, client: openai.AsyncOpenAI | None = None):
         super().__init__(spec)
         self.client = client or openai.AsyncOpenAI(
-            api_key=spec.api_key(),
+            api_key=spec.api_key() or "unset",  # missing keys fail at request time, not in --dry-run
             base_url=spec.resolved_base_url(),
             timeout=spec.timeout_s,
             max_retries=4,
@@ -82,20 +82,19 @@ class OpenAIChatProvider(Provider):
         if u is not None:
             out_details = getattr(u, "completion_tokens_details", None)
             in_details = getattr(u, "prompt_tokens_details", None)
+            reasoning = getattr(out_details, "reasoning_tokens", 0) or 0
             usage = Usage(
                 input_tokens=u.prompt_tokens or 0,
-                output_tokens=u.completion_tokens or 0,
-                reasoning_tokens=getattr(out_details, "reasoning_tokens", 0) or 0,
+                output_tokens=billable_output(
+                    u.completion_tokens or 0, reasoning, u.prompt_tokens or 0, getattr(u, "total_tokens", None)
+                ),
+                reasoning_tokens=reasoning,
                 cached_input_tokens=getattr(in_details, "cached_tokens", 0) or 0,
             )
             # OpenRouter reports the actual charge in usage.cost (USD).
             extra = getattr(u, "model_extra", None) or {}
             if isinstance(extra.get("cost"), (int, float)):
                 provider_cost = float(extra["cost"])
-            # Some OpenAI-compatible servers (e.g. xAI) report reasoning tokens separately
-            # from completion_tokens; count them as billable output if so.
-            if usage.reasoning_tokens and usage.output_tokens < usage.reasoning_tokens:
-                usage.output_tokens += usage.reasoning_tokens
 
         return ProviderResult(
             text=msg.content,
@@ -106,6 +105,7 @@ class OpenAIChatProvider(Provider):
             truncated=finish == "length",
             provider_cost_usd=provider_cost,
             served_model=resp.model,
+            raw_usage=dump_usage(u),
         )
 
     async def aclose(self) -> None:

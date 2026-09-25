@@ -15,7 +15,7 @@ from __future__ import annotations
 import anthropic
 
 from ..prompt import OUTPUT_SCHEMA
-from .base import Provider, ProviderError, ProviderResult, Usage, b64
+from .base import Provider, ProviderError, ProviderResult, Usage, b64, dump_usage
 
 
 class AnthropicProvider(Provider):
@@ -90,6 +90,7 @@ class AnthropicProvider(Provider):
             refused=msg.stop_reason == "refusal",
             truncated=msg.stop_reason == "max_tokens",
             served_model=msg.model,
+            raw_usage=dump_usage(u),
         )
 
     async def aclose(self) -> None:

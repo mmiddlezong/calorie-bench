@@ -195,6 +195,7 @@ async def run_model(
                 record.update(
                     {
                         "usage": result.usage.to_dict(),
+                        "raw_usage": result.raw_usage,
                         "cost_usd": round(cost, 6),
                         "stop_reason": result.stop_reason,
                         "served_model": result.served_model,

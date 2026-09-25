@@ -14,11 +14,11 @@ def make_provider(spec: ModelSpec) -> Provider:
         from .anthropic_provider import AnthropicProvider
 
         return AnthropicProvider(spec)
-    if spec.provider == "openai":
+    if spec.provider in ("openai", "xai"):
         from .openai_provider import OpenAIResponsesProvider
 
         return OpenAIResponsesProvider(spec)
-    if spec.provider in ("xai", "openrouter", "openai_chat"):
+    if spec.provider in ("openrouter", "openai_chat"):
         from .openai_chat_provider import OpenAIChatProvider
 
         return OpenAIChatProvider(spec)

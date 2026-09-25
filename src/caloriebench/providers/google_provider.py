@@ -14,7 +14,7 @@ from google.genai import errors as genai_errors
 from google.genai import types
 
 from ..prompt import OUTPUT_SCHEMA
-from .base import Provider, ProviderError, ProviderResult, Usage
+from .base import Provider, ProviderError, ProviderResult, Usage, dump_usage
 
 _REFUSAL_FINISH = {
     "SAFETY",
@@ -43,7 +43,7 @@ class GoogleProvider(Provider):
         )
         if spec.base_url:
             http_options.base_url = spec.base_url
-        self.client = client or genai.Client(api_key=spec.api_key(), http_options=http_options)
+        self.client = client or genai.Client(api_key=spec.api_key() or "unset", http_options=http_options)
 
     def build_request(self, image: bytes, media_type: str, prompt: str) -> dict:
         p = self.spec.params
@@ -61,26 +61,28 @@ class GoogleProvider(Provider):
         if p.get("media_resolution"):
             config["media_resolution"] = f"MEDIA_RESOLUTION_{str(p['media_resolution']).upper()}"
         config.update(p.get("extra", {}))
+        contents = self._contents(image, media_type, prompt)
         return {
             "model": self.spec.model,
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [
-                        {"inline_data": {"mime_type": media_type, "data": image}},
-                        {"text": prompt},
-                    ],
-                }
-            ],
+            "contents": [c.model_dump(exclude_none=True) for c in contents],
             "config": config,
         }
+
+    @staticmethod
+    def _contents(image: bytes, media_type: str, prompt: str) -> list[types.Content]:
+        return [
+            types.Content(
+                role="user",
+                parts=[types.Part.from_bytes(data=image, mime_type=media_type), types.Part.from_text(text=prompt)],
+            )
+        ]
 
     async def complete(self, image: bytes, media_type: str, prompt: str) -> ProviderResult:
         req = self.build_request(image, media_type, prompt)
         try:
             resp = await self.client.aio.models.generate_content(
                 model=req["model"],
-                contents=req["contents"],
+                contents=self._contents(image, media_type, prompt),
                 config=types.GenerateContentConfig(**req["config"]),
             )
         except genai_errors.ClientError as e:
@@ -119,6 +121,7 @@ class GoogleProvider(Provider):
             refused=bool(block) or (finish in _REFUSAL_FINISH),
             truncated=finish == "MAX_TOKENS",
             served_model=getattr(resp, "model_version", None),
+            raw_usage=dump_usage(um),
         )
 
     async def aclose(self) -> None:

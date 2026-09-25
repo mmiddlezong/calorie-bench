@@ -34,6 +34,7 @@ class ProviderResult:
     truncated: bool = False
     provider_cost_usd: float | None = None  # cost reported by the API itself, if any
     served_model: str | None = None
+    raw_usage: dict | None = None  # the provider's usage block, verbatim, for auditing
 
 
 class ProviderError(Exception):
@@ -54,6 +55,24 @@ class Provider(ABC):
 
     async def aclose(self) -> None:  # pragma: no cover - optional hook
         return None
+
+
+def billable_output(output_tokens: int, reasoning_tokens: int, input_tokens: int, total_tokens: int | None) -> int:
+    """Billable output tokens, robust to both OpenAI-style conventions: some servers include
+    reasoning tokens in the output count (OpenAI), others report them separately and only
+    include them in total_tokens (e.g. xAI)."""
+    if total_tokens:
+        return max(output_tokens, total_tokens - input_tokens)
+    return output_tokens
+
+
+def dump_usage(usage) -> dict | None:
+    if usage is None:
+        return None
+    try:
+        return usage.model_dump(exclude_none=True)
+    except AttributeError:
+        return dict(usage) if isinstance(usage, dict) else None
 
 
 def b64(image: bytes) -> str:
