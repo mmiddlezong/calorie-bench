@@ -10,8 +10,8 @@
 # estimate: per-request token ASSUMPTIONS for pre-run cost estimates only.
 #   image_tokens     provider's documented cost of one 640x480 image
 #   reasoning_tokens expected hidden reasoning tokens (billed as output). Sources:
-#                    Artificial Analysis MMMU-Pro token counts where available,
-#                    otherwise a conservative guess. `caloriebench estimate` shows a
+#                    measured usage for models already run ("measured"), else
+#                    Artificial Analysis MMMU-Pro token counts, else a conservative guess. `caloriebench estimate` shows a
 #                    0.5x-2.5x range around it.
 # params:   provider-specific request settings - see the docstring of each provider in
 #           src/caloriebench/providers/. Sampling parameters (temperature etc.) are left
@@ -35,7 +35,7 @@ defaults:
   timeout_s: 600
   estimate:
     text_tokens: 330     # the prompt (~900 chars) plus message framing
-    output_tokens: 300   # itemized JSON answer
+    output_tokens: 150   # itemized JSON answer (measured: 93-156 across 7 models)
 
 models:
   # ------------------------------------------------------------------ Anthropic
@@ -50,7 +50,7 @@ models:
     params: {effort: high}
     reasoning: "adaptive thinking (always on), effort=high (also the API default)"
     pricing: {input: 10.00, output: 50.00, cached_input: 0.25}
-    estimate: {image_tokens: 414, reasoning_tokens: 1500}
+    estimate: {image_tokens: 414, text_tokens: 779, output_tokens: 128, reasoning_tokens: 0}  # measured on 100 dishes
 
   - id: claude-opus-5-5
     display_name: Claude Opus 5.5
@@ -61,7 +61,7 @@ models:
     params: {effort: high}
     reasoning: "adaptive thinking (always on), effort=high (API default is medium)"
     pricing: {input: 4.00, output: 20.00, cached_input: 0.20}
-    estimate: {image_tokens: 414, reasoning_tokens: 1500}
+    estimate: {image_tokens: 414, text_tokens: 779, output_tokens: 156, reasoning_tokens: 33}  # measured on 100 dishes
 
   - id: claude-sonnet-5
     display_name: Claude Sonnet 5
@@ -72,7 +72,7 @@ models:
     params: {effort: high}
     reasoning: "adaptive thinking (default on), effort=high (also the API default)"
     pricing: {input: 2.00, output: 10.00, cached_input: 0.20}
-    estimate: {image_tokens: 414, reasoning_tokens: 1200}
+    estimate: {image_tokens: 414, text_tokens: 777, output_tokens: 140, reasoning_tokens: 0}  # measured on 100 dishes
 
   - id: claude-haiku-4-5
     display_name: Claude Haiku 4.5
@@ -84,7 +84,7 @@ models:
     params: {thinking: {type: enabled, budget_tokens: 8000}}
     reasoning: "extended thinking, 8,000-token budget (API default is no thinking)"
     pricing: {input: 1.00, output: 5.00, cached_input: 0.10}
-    estimate: {image_tokens: 414, reasoning_tokens: 1500}
+    estimate: {image_tokens: 414, text_tokens: 681, output_tokens: 125, reasoning_tokens: 1512}  # measured on 100 dishes
 
   # ------------------------------------------------------------------ OpenAI (Responses API)
   # Image tokens: 32x32 patches * 1.2 -> 20 * 15 * 1.2 = 360 at detail=high.
@@ -99,7 +99,7 @@ models:
     max_output_tokens: 25000
     reasoning: "reasoning effort=high (API default not documented)"
     pricing: {input: 10.00, output: 50.00, cached_input: 1.00}
-    estimate: {image_tokens: 360, reasoning_tokens: 500}  # AA MMMU-Pro: 282 at high
+    estimate: {image_tokens: 360, text_tokens: 321, output_tokens: 99, reasoning_tokens: 890}  # measured on 100 dishes
 
   - id: gpt-6-sol
     display_name: GPT-6 Sol
@@ -111,7 +111,7 @@ models:
     max_output_tokens: 25000
     reasoning: "reasoning effort=high (API default is medium)"
     pricing: {input: 2.00, output: 10.00, cached_input: 0.20}
-    estimate: {image_tokens: 360, reasoning_tokens: 1000}  # AA MMMU-Pro: 1,643 at max
+    estimate: {image_tokens: 360, text_tokens: 321, output_tokens: 94, reasoning_tokens: 710}  # measured on 100 dishes
 
   - id: gpt-6-luna
     display_name: GPT-6 Luna
@@ -123,7 +123,7 @@ models:
     max_output_tokens: 25000
     reasoning: "reasoning effort=high (API default is medium)"
     pricing: {input: 0.10, output: 0.50, cached_input: 0.01}
-    estimate: {image_tokens: 360, reasoning_tokens: 2500}  # AA MMMU-Pro: 5,417 at max
+    estimate: {image_tokens: 360, text_tokens: 321, output_tokens: 97, reasoning_tokens: 774}  # measured on 100 dishes
 
   # ------------------------------------------------------------------ Google (Gemini API)
   # Image tokens: media_resolution=high -> 1,120 per image (Google's recommendation for

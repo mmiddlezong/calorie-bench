@@ -2,7 +2,7 @@
   "dataset": "Nutrition5k (Thames et al., CVPR 2021), https://github.com/google-research-datasets/Nutrition5k",
   "license": "CC BY 4.0",
   "split": "rgb_test_ids",
-  "n_dishes": 100,
+  "n_dishes": 200,
   "n_strata": 10,
   "seed": 20260925,
   "filters": {
@@ -30,12 +30,16 @@
   ],
   "rejected_during_draw": {
     "dish_1562099053": "manual: food almost entirely outside the frame",
+    "dish_1565123783": "manual: food almost entirely outside the frame",
+    "dish_1566920304": "manual: neighboring plate with unlabeled food (sweet potato) in frame",
+    "dish_1565898361": "manual: neighboring plate with unlabeled food (olives, tomatoes, carrots) in frame",
+    "dish_1565898402": "manual: neighboring plate with unlabeled food (olives, tomatoes, carrots) in frame",
     "dish_1565898432": "manual: neighboring plate with unlabeled food (olives, tomatoes, carrots) in frame"
   },
   "calories": {
     "min": 30.8,
-    "median": 248.1,
-    "mean": 274.2,
-    "max": 920.1
+    "median": 248.2,
+    "mean": 278.4,
+    "max": 941.6
   }
 }

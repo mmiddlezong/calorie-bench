@@ -45,7 +45,7 @@ from caloriebench.paths import DATA_DIR, IMAGES_DIR, MANIFEST_PATH  # noqa: E402
 BUCKET = "https://storage.googleapis.com/nutrition5k_dataset/nutrition5k_dataset"
 LIST_API = "https://storage.googleapis.com/storage/v1/b/nutrition5k_dataset/o"
 
-N_DISHES = 100
+N_DISHES = 200
 N_STRATA = 10
 SEED = 20260925
 MIN_KCAL = 30.0
@@ -60,6 +60,11 @@ ATWATER_TOL = 0.25
 EXCLUDE: dict[str, str] = {
     "dish_1562099053": "food almost entirely outside the frame",
     "dish_1565898432": "neighboring plate with unlabeled food (olives, tomatoes, carrots) in frame",
+    # Added when the subset grew to 200 dishes:
+    "dish_1565123783": "food almost entirely outside the frame",
+    "dish_1565898361": "neighboring plate with unlabeled food (olives, tomatoes, carrots) in frame",
+    "dish_1565898402": "neighboring plate with unlabeled food (olives, tomatoes, carrots) in frame",
+    "dish_1566920304": "neighboring plate with unlabeled food (sweet potato) in frame",
 }
 
 TARGETS = ["calories", "mass_g", "fat_g", "carbs_g", "protein_g"]

@@ -80,6 +80,25 @@ def manifest_hash(manifest: Path = MANIFEST_PATH) -> str:
     return hashlib.sha256(manifest.read_bytes()).hexdigest()[:16]
 
 
+def dishes_hash(dish_ids, manifest: Path = MANIFEST_PATH) -> str | None:
+    """Fingerprint of specific dishes (labels, ingredients, image checksum), ignoring their
+    position in the manifest. Lets results survive the manifest growing: a run stays valid
+    as long as every dish it has answers for is unchanged. None if any dish is missing."""
+    rows = {}
+    with manifest.open() as f:
+        for line in f:
+            if line.strip():
+                row = json.loads(line)
+                row.pop("index", None)
+                rows[row["dish_id"]] = row
+    h = hashlib.sha256()
+    for dish_id in sorted(set(dish_ids)):
+        if dish_id not in rows:
+            return None
+        h.update(json.dumps(rows[dish_id], sort_keys=True).encode())
+    return h.hexdigest()[:16]
+
+
 def download_images(force: bool = False, workers: int = 8) -> tuple[int, int]:
     """Fetch the subset's images from the public Nutrition5k bucket and verify checksums.
     Returns (downloaded, already_present)."""

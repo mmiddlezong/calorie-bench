@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CalorieBench</title>
-<meta name="description" content="How well can AI models count calories from a photo of a meal? Results on 100 real cafeteria plates with weighed ground truth.">
+<meta name="description" content="How well can AI models count calories from a photo of a meal? Results on 200 real cafeteria plates with weighed ground truth.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111'/%3E%3Crect x='6' y='8' width='20' height='3' fill='%23fff'/%3E%3Crect x='6' y='15' width='20' height='1.5' fill='%23fff'/%3E%3Crect x='6' y='21' width='14' height='1.5' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -241,7 +241,7 @@ footer { font-size: 13px; color: var(--muted); padding: 48px 0 64px; border-top:
 <main class="wrap" id="top">
   <div class="intro">
     <h1>How well can AI count calories from a photo?</h1>
-    <p>We showed AI models 100 photos of real cafeteria plates and asked how many calories were on each one.
+    <p>We showed AI models <span class="n-dishes">200</span> photos of real cafeteria plates and asked how many calories were on each one.
       The right answers come from <a href="https://github.com/google-research-datasets/Nutrition5k">Nutrition5k</a>,
       where every ingredient was weighed as the plate was put together.</p>
     <p class="finding" id="finding"></p>
@@ -288,7 +288,7 @@ footer { font-size: 13px; color: var(--muted); padding: 48px 0 64px; border-top:
 
   <section id="plates">
     <header>
-      <h2>The 100 plates</h2>
+      <h2>The <span class="n-dishes">200</span> plates</h2>
       <div class="controls">
         <label>Estimates from <select id="dx-model"></select></label>
         <label>Order <select id="dx-sort">
@@ -302,20 +302,20 @@ footer { font-size: 13px; color: var(--muted); padding: 48px 0 64px; border-top:
       </div>
     </header>
     <div class="gallery" id="gallery"></div>
-    <button class="more" id="more">Show all 100 plates</button>
+    <button class="more" id="more">Show all <span class="n-dishes">200</span> plates</button>
   </section>
 
   <section id="method">
     <header><h2>Method</h2></header>
     <div class="method">
-      <p><b>The plates.</b> 100 dishes from the official Nutrition5k test set, 10 from each tenth of the calorie range (31 to 920 kcal).
+      <p><b>The plates.</b> <span class="n-dishes">200</span> dishes from the official Nutrition5k test set, the same number from each tenth of the calorie range (31 to 942 kcal).
         Plates whose labels didn't add up, or where food was out of frame, were left out.</p>
       <p><b>The question.</b> Each model gets one overhead photo and the same prompt: list the foods with their weights and calories, then give totals for the plate.
         Every model runs at its high reasoning setting.</p>
       <p><b>Scoring.</b> The main number is the average gap between a model's calorie estimate and the weighed truth.
         The ranges are 95% confidence intervals, so models whose ranges overlap may not really differ.
         An answer that fails or is refused counts as a guess of zero.</p>
-      <p><b>Limits.</b> 100 plates is a small sample, all from one set of cafeterias and one camera angle, with nothing in the photo for scale.
+      <p><b>Limits.</b> This is still a small sample, all from one cafeteria and one camera angle, with nothing in the photo for scale.
         The truth comes from weighed ingredients and nutrition databases, not lab tests.
         Code, prompt and every raw answer are on <a href="https://github.com/mmiddlezong/calorie-bench">GitHub</a>.</p>
     </div>
@@ -388,6 +388,8 @@ for (const d of dishes) {
   d.disagree = vals.length > 1 && mean > 0 ? Math.sqrt(vals.reduce((a, v) => a + (v - mean) ** 2, 0) / vals.length) / mean : 0;
 }
 
+document.querySelectorAll(".n-dishes").forEach(e => { e.textContent = D.n_dishes; });
+
 // ---------- the finding, in a sentence
 (function finding() {
   const best = real[0];
@@ -419,7 +421,7 @@ const COLS = {
   cal: [
     [null, "#"], ["name", "Model"], ["mae", "Average error", "Average gap between the estimate and the weighed truth, in kcal. Range is the 95% confidence interval."],
     ["within20", "Within 20%", "Share of plates estimated within 20% of the truth"], ["bias", "Bias", "Average signed error in kcal. Negative means the model tends to underestimate."],
-    ["cost_per_100", "Cost, 100 plates", "API cost at list prices"], ["latency", "Time per plate", "Median response time"],
+    ["cost_per_100", "Cost per 100 plates", "API cost at list prices"], ["latency", "Time per plate", "Median response time"],
   ],
   mac: [
     [null, "#"], ["name", "Model"], ["mass", "Weight error (g)", "Average gap from the weighed weight, and that gap as a share of the average plate"],
@@ -541,7 +543,7 @@ function renderCost() {
   if (!pts.length) { host.innerHTML = '<div class="empty">No results yet.</div>'; return; }
   const W = Math.max(320, host.clientWidth), H = Math.round(Math.min(520, Math.max(320, W * 0.5)));
   const M = {t: 14, r: 16, b: 46, l: 52};
-  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Average calorie error against cost for 100 plates"}, host);
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Average calorie error against cost per 100 plates"}, host);
   const costs = pts.map(m => m.cost_per_100), errs = pts.map(m => m.mae);
   let x0 = Math.min(...costs) / 1.8, x1 = Math.max(...costs) * 1.8;
   if (x1 / x0 < 12) { const c = Math.sqrt(x0 * x1); x0 = c / 3.5; x1 = c * 3.5; }
@@ -563,7 +565,7 @@ function renderCost() {
   for (const v of logTicks(x0, x1))
     el("text", {x: X(v), y: B + 18, "text-anchor": "middle", class: "tick"}, svg).textContent = "$" + (v < 1 ? v : v.toFixed(0));
   el("line", {x1: L, x2: R, y1: B, y2: B, stroke: "var(--rule)", "stroke-width": 1.5}, svg);
-  el("text", {x: (L + R) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "Cost for 100 plates (log scale)";
+  el("text", {x: (L + R) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "Cost per 100 plates (log scale)";
   axisY(svg, M, H, "Average error (kcal)");
 
   // reference lines: most accurate model and cheapest model
@@ -595,7 +597,7 @@ function renderCost() {
      <tr><td>Average error</td><td>${f0(p.m.mae)} kcal</td></tr>
      <tr><td>95% range</td><td>${f0(p.m.mae_ci[0])}–${f0(p.m.mae_ci[1])}</td></tr>
      <tr><td>Within 20%</td><td>${pct(p.m.within20)}</td></tr>
-     <tr><td>Cost, 100 plates</td><td>${usd(p.m.cost_per_100)}</td></tr></table>`, e.clientX, e.clientY));
+     <tr><td>Cost per 100 plates</td><td>${usd(p.m.cost_per_100)}</td></tr></table>`, e.clientX, e.clientY));
 }
 
 // ---------- horizontal bar charts

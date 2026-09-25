@@ -10,7 +10,7 @@ Requires [uv](https://docs.astral.sh/uv/). Python 3.12 is installed automaticall
 ```bash
 git clone https://github.com/mmiddlezong/calorie-bench && cd calorie-bench
 uv sync
-uv run caloriebench download          # fetch the 100 images (~38 MB) from the public Nutrition5k bucket
+uv run caloriebench download          # fetch the 200 images (~79 MB) from the public Nutrition5k bucket
 cp .env.example .env                  # then add the API keys you have
 uv run caloriebench models            # shows which models have keys configured
 uv run caloriebench estimate frontier # cost estimate; sends nothing
@@ -43,44 +43,45 @@ Other commands: `caloriebench compare A B` (paired significance test),
 
 ## Cost estimates
 
-Estimated API cost for one full pass over the 100 dishes, with every model at high reasoning
+Estimated API cost for one full pass over the 200 dishes, with every model at high reasoning
 effort, at list prices verified on **2026-09-25** (regenerate with `uv run caloriebench estimate --markdown`):
 
-| Model | Lab | Price in / out ($/1M) | Tokens in / out per dish | Expected (100 dishes) | Range |
+| Model | Lab | Price in / out ($/1M) | Tokens in / out per dish | Expected (200 dishes) | Range |
 |---|---|---:|---:|---:|---:|
-| Claude Fable 5.1 | Anthropic | $10 / $50 | 744 / 1,800 | **$9.74** | $5.99–$20.99 |
-| Claude Opus 5.5 | Anthropic | $4 / $20 | 744 / 1,800 | **$3.90** | $2.40–$8.40 |
-| Claude Sonnet 5 | Anthropic | $2 / $10 | 744 / 1,500 | **$1.65** | $1.05–$3.45 |
-| Claude Haiku 4.5 | Anthropic | $1 / $5 | 744 / 1,800 | **$0.97** | $0.60–$2.10 |
-| GPT-6 Astra | OpenAI | $10 / $50 | 690 / 800 | **$4.69** | $3.44–$8.44 |
-| GPT-6 Sol | OpenAI | $2 / $10 | 690 / 1,300 | **$1.44** | $0.94–$2.94 |
-| GPT-6 Luna | OpenAI | $0.1 / $0.5 | 690 / 2,800 | **$0.15** | $0.08–$0.33 |
-| Gemini 3.8 Flash | Google | $0.75 / $3.75 | 1,450 / 4,800 | **$1.91** | $1.06–$4.44 |
-| Gemini 3.1 Pro (preview) | Google | $2 / $12 | 1,450 / 3,300 | **$4.25** | $2.45–$9.65 |
-| Gemini 3.5 Flash-Lite | Google | $0.3 / $2.5 | 1,450 / 3,300 | **$0.87** | $0.49–$1.99 |
-| Grok 4.7 | xAI | $2 / $6 | 1,930 / 3,300 | **$2.37** | $1.47–$5.07 |
-| Grok 4.3 | xAI | $1.25 / $2.5 | 1,930 / 3,300 | **$1.07** | $0.69–$2.19 |
-| Kimi K3 | Moonshot AI (open weights) | $3 / $15 | 1,330 / 3,300 | **$5.35** | $3.10–$12.10 |
-| Qwen3.8 Flash | Alibaba (open weights) | $0.15 / $0.47 | 630 / 3,300 | **$0.16** | $0.09–$0.38 |
-| Ling 3.0 Flash VL | inclusionAI (open weights) | $0.06 / $0.18 | 630 / 3,300 | **$0.06** | $0.04–$0.14 |
-| MiniMax-M3 | MiniMax (open weights) | $0.3 / $1.2 | 830 / 6,200 | **$0.77** | $0.41–$1.83 |
-| **Total** | | | | **$39.34** | $24.31–$84.44 |
+| Claude Fable 5.1 | Anthropic | $10 / $50 | 1,193 / 128 | **$3.67** | $3.67–$3.67 |
+| Claude Opus 5.5 | Anthropic | $4 / $20 | 1,193 / 189 | **$1.71** | $1.64–$1.91 |
+| Claude Sonnet 5 | Anthropic | $2 / $10 | 1,191 / 140 | **$0.76** | $0.76–$0.76 |
+| Claude Haiku 4.5 | Anthropic | $1 / $5 | 1,095 / 1,637 | **$1.86** | $1.10–$4.12 |
+| GPT-6 Astra | OpenAI | $10 / $50 | 681 / 989 | **$11.25** | $6.80–$24.60 |
+| GPT-6 Sol | OpenAI | $2 / $10 | 681 / 804 | **$1.88** | $1.17–$4.01 |
+| GPT-6 Luna | OpenAI | $0.1 / $0.5 | 681 / 871 | **$0.10** | $0.06–$0.22 |
+| Gemini 3.8 Flash | Google | $0.75 / $3.75 | 1,450 / 4,650 | **$3.71** | $2.02–$8.77 |
+| Gemini 3.1 Pro (preview) | Google | $2 / $12 | 1,450 / 3,150 | **$8.14** | $4.54–$18.94 |
+| Gemini 3.5 Flash-Lite | Google | $0.3 / $2.5 | 1,450 / 3,150 | **$1.66** | $0.91–$3.91 |
+| Grok 4.7 | xAI | $2 / $6 | 1,930 / 3,150 | **$4.55** | $2.75–$9.95 |
+| Grok 4.3 | xAI | $1.25 / $2.5 | 1,930 / 3,150 | **$2.06** | $1.31–$4.31 |
+| Kimi K3 | Moonshot AI (open weights) | $3 / $15 | 1,330 / 3,150 | **$10.25** | $5.75–$23.75 |
+| Qwen3.8 Flash | Alibaba (open weights) | $0.15 / $0.47 | 630 / 3,150 | **$0.32** | $0.17–$0.74 |
+| Ling 3.0 Flash VL | inclusionAI (open weights) | $0.06 / $0.18 | 630 / 3,150 | **$0.12** | $0.07–$0.28 |
+| MiniMax-M3 | MiniMax (open weights) | $0.3 / $1.2 | 830 / 6,050 | **$1.50** | $0.79–$3.63 |
+| **Total** | | | | **$53.52** | $33.51–$113.56 |
 
 | Group | What | Expected | Range |
 |---|---|---:|---:|
-| `smoke -n 3` | cheapest model per provider, 3 dishes: checks keys and plumbing | **$0.10** | $0.06–$0.21 |
-| `frontier -n 10` | headline models, 10 calorie-balanced dishes | **$3.22** | $1.99–$6.91 |
-| `budget` | 9 cheaper models, full run | **$7.14** | $4.40–$15.36 |
-| `frontier` | 7 headline models, full run | **$32.21** | $19.91–$69.09 |
-| `all` | all 16 models, full run | **$39.34** | $24.31–$84.44 |
+| `smoke -n 3` | cheapest model per provider, 3 dishes: checks keys and plumbing | **$0.09** | $0.05–$0.20 |
+| `frontier -n 10` | headline models, 10 calorie-balanced dishes | **$2.16** | $1.36–$4.58 |
+| `budget` | 9 cheaper models, full run | **$10.25** | $6.34–$21.97 |
+| `frontier` | 7 headline models, full run | **$43.27** | $27.17–$91.58 |
+| `all` | all 16 models, full run | **$53.52** | $33.51–$113.56 |
 
 How to read this:
 
 * **The uncertainty is almost entirely hidden reasoning tokens**, which are billed as
-  output. Per-model assumptions come from Artificial Analysis MMMU-Pro token counts where
-  available (noted in [`configs/models.yaml`](../configs/models.yaml)). The range is 0.5× to
-  2.5× that assumption. Claude Fable 5.1 is the most expensive because it has the highest
-  output price, and it reasons on every request.
+  output. Per-model assumptions are measured usage for models already run, and otherwise
+  Artificial Analysis MMMU-Pro token counts where available (noted in [`configs/models.yaml`](../configs/models.yaml)). The range is 0.5× to
+  2.5× that assumption. Of the models run so far, GPT-6 Astra is the most expensive: it has
+  the highest output price and spends about 900 reasoning tokens on every plate. At high
+  effort, Claude Fable 5.1 and Sonnet 5 chose not to use extended thinking on any plate.
 * **Image tokens differ a lot by provider.** A 640×480 photo costs 414 tokens on Claude,
   360 on GPT-6, 1,120 on Gemini (`media_resolution=high`), and roughly 1,600 on Grok
   (undocumented; the real number is logged on the first run).
@@ -110,9 +111,11 @@ committed to the repo:
    * at least 30 kcal, because tiny dishes make relative errors meaningless.
    * macros consistent with calories: |4·protein + 4·carbs + 9·fat − kcal| ≤ 25% of kcal.
      This catches likely label errors.
-4. **Calorie-stratified sample**: 10 dishes from each calorie decile (seed `20260925`).
-5. **Manual review of every drawn image.** Two were replaced: one where the food was
-   almost entirely out of frame, and one with a neighbor's unlabeled food in view.
+4. **Calorie-stratified sample**: 20 dishes from each calorie decile (seed `20260925`). The
+   benchmark started with 10 per decile; growing it to 20 kept the original 100 dishes
+   unchanged, so results on them carry over and only the new dishes need to be run.
+5. **Manual review of every drawn image.** Six were replaced: two where the food was
+   almost entirely out of frame, and four with a neighbor's unlabeled food in view.
    Replacements were drawn from the same decile. About 15% of large plates have some
    food touching the top edge of the frame, because of the fixed camera. Those are kept,
    as in the original benchmark, since excluding them would bias toward small meals.
@@ -120,7 +123,7 @@ committed to the repo:
 
 | | min | median | mean | max |
 |---|---:|---:|---:|---:|
-| Calories (kcal) | 31 | 248 | 274 | 920 |
+| Calories (kcal) | 31 | 248 | 278 | 942 |
 
 Images are fetched from the public bucket by `caloriebench download` and verified against
 the SHA-256 checksums in the manifest. The manifest also includes each dish's weighed
@@ -197,7 +200,7 @@ Scoring rules:
   overestimates. A model that answered "0 kcal" for everything would get MAPE = 100%,
   better than always guessing an average plate (111%). MAPE is also dominated by the
   smallest dishes.
-* **Significance.** With 100 dishes, differences of 10–15 kcal are often noise.
+* **Significance.** With 200 dishes, differences under about 10 kcal are often noise.
   `caloriebench compare A B` runs a paired bootstrap test on the dishes both models
   answered.
 
@@ -261,7 +264,7 @@ Run `uv run caloriebench run my-model-high --dry-run` to check the request befor
 
 ```
 configs/models.yaml          model registry: API ids, request settings, prices, estimates
-data/manifest.jsonl          the 100 dishes: labels, ingredients, image URL + checksum
+data/manifest.jsonl          the 200 dishes: labels, ingredients, image URL + checksum
 data/subset_info.json        how the subset was drawn
 scripts/build_subset.py      reproducible subset construction (maintainers only)
 src/caloriebench/
@@ -282,7 +285,7 @@ normalized and raw token usage, cost, latency, served model version, and request
 
 ## Caveats
 
-* **100 dishes is small.** Confidence intervals are wide (roughly ±15–25 kcal on MAE). Use `compare` before claiming one model beats another.
+* **200 dishes is still small.** Confidence intervals are roughly ±15 kcal on MAE. Use `compare` before claiming one model beats another.
 * **One cuisine and one setting.** These are Google cafeteria plates from 2019, photographed
   from directly above with no scale reference. Results may not transfer to home cooking,
   restaurant food, or phone photos taken at an angle.

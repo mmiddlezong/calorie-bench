@@ -70,16 +70,30 @@ def models(group: Annotated[str | None, typer.Option(help="Only show this group.
     console.print("Groups: " + ", ".join(f"{g} ({len(ids)})" for g, ids in reg.groups().items()))
 
 
-def _estimate_table(specs, n_requests: int) -> tuple[Table, float, float, float]:
-    table = Table(title=f"Estimated cost for {n_requests} requests per model")
-    for col in ("model", "in tok/req", "out tok/req", "low", "expected", "high"):
+def _estimate_table(specs, n_requests: int | dict[str, int]) -> tuple[Table, float, float, float]:
+    """n_requests: one count for every model, or {model_id: count} for per-model counts."""
+    per_model = isinstance(n_requests, dict)
+    title = (
+        "Estimated cost of the remaining requests"
+        if per_model
+        else f"Estimated cost for {n_requests} requests per model"
+    )
+    table = Table(title=title)
+    cols = (
+        ("model", "requests", "in tok/req", "out tok/req", "low", "expected", "high")
+        if per_model
+        else ("model", "in tok/req", "out tok/req", "low", "expected", "high")
+    )
+    for col in cols:
         table.add_column(col, justify="right" if col != "model" else "left")
     lo = ex = hi = 0.0
     for spec in specs:
-        est = estimate_cost(spec, n_requests)
+        n = n_requests[spec.id] if per_model else n_requests
+        est = estimate_cost(spec, n)
         lo, ex, hi = lo + est.low_usd, ex + est.expected_usd, hi + est.high_usd
         table.add_row(
             spec.id,
+            *([str(n)] if per_model else []),
             str(est.input_tokens_per_req),
             str(est.output_tokens_per_req),
             f"${est.low_usd:.2f}",
@@ -87,7 +101,7 @@ def _estimate_table(specs, n_requests: int) -> tuple[Table, float, float, float]
             f"${est.high_usd:.2f}",
         )
     table.add_section()
-    table.add_row("[bold]TOTAL[/]", "", "", f"${lo:.2f}", f"[bold]${ex:.2f}[/]", f"${hi:.2f}")
+    table.add_row("[bold]TOTAL[/]", *([""] * (len(cols) - 4)), f"${lo:.2f}", f"[bold]${ex:.2f}[/]", f"${hi:.2f}")
     return table, lo, ex, hi
 
 
@@ -191,9 +205,19 @@ def run(
 
     paid = specs
     if paid and not yes:
-        table, lo, ex, hi = _estimate_table(paid, len(dishes) * repeats)
+        from .runner import FINAL_STATUSES, predictions_path, read_records
+
+        remaining = {}
+        for spec in paid:
+            done = {
+                (r["dish_id"], r.get("sample", 0))
+                for r in read_records(predictions_path(spec.id))
+                if r.get("status") in FINAL_STATUSES
+            }
+            remaining[spec.id] = sum((d.dish_id, s) not in done for s in range(repeats) for d in dishes)
+        table, lo, ex, hi = _estimate_table(paid, remaining)
         console.print(table)
-        console.print("[dim]Already-completed dishes are skipped, so resumed runs cost less.[/]")
+        console.print("[dim]Only dishes without an answer yet are counted; finished ones are skipped.[/]")
         if not typer.confirm(f"Proceed? (expected ≈ ${ex:.2f}, range ${lo:.2f}–${hi:.2f})"):
             raise typer.Exit(0)
 

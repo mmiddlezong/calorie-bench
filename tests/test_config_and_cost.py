@@ -54,9 +54,12 @@ def test_estimate_range(spec_factory):
 
 def test_manifest_prefix_is_calorie_balanced():
     dishes = load_dishes()
-    assert len(dishes) == 100
-    assert len({d.dish_id for d in dishes}) == 100
+    assert len(dishes) == 200
+    assert len({d.dish_id for d in dishes}) == 200
     assert sorted(d.calorie_stratum for d in dishes[:10]) == list(range(10))
+    for n in (100, 200):  # any multiple-of-10 prefix is balanced: n/10 dishes per decile
+        counts = [sum(d.calorie_stratum == s for d in dishes[:n]) for s in range(10)]
+        assert counts == [n // 10] * 10
     assert all(d.calories >= 30 for d in dishes)
 
 

@@ -113,3 +113,22 @@ def test_read_records_tolerates_torn_line(tmp_path):
     p = tmp_path / "p.jsonl"
     p.write_text('{"dish_id": "a", "status": "ok"}\n{"dish_id": "b", "sta')
     assert [r["dish_id"] for r in runner.read_records(p)] == ["a"]
+
+
+async def test_dataset_growth_keeps_results_but_edits_do_not(tmp_path, spec_factory, dishes, use_fake, monkeypatch):
+    spec = spec_factory()
+    use_fake()
+    # Stand-in fingerprint: these fake dishes are not in the real manifest.
+    monkeypatch.setattr(runner, "dishes_hash", lambda ids: "labels-v1")
+    await runner.run_model(spec, dishes[:3], results_dir=tmp_path)
+
+    # The manifest grows (new dishes added); the three answered dishes are unchanged.
+    monkeypatch.setattr(runner, "manifest_hash", lambda: "grown-manifest")
+    s = await runner.run_model(spec, dishes, results_dir=tmp_path)
+    assert s.skipped == 3 and s.attempted == 3
+
+    # An answered dish's labels change: the fingerprint no longer matches, so refuse.
+    monkeypatch.setattr(runner, "manifest_hash", lambda: "edited-manifest")
+    monkeypatch.setattr(runner, "dishes_hash", lambda ids: "different")
+    with pytest.raises(runner.RunConfigMismatch):
+        await runner.run_model(spec, dishes, results_dir=tmp_path)

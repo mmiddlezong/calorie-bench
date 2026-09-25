@@ -22,7 +22,7 @@ from pathlib import Path
 from . import __version__
 from .config import ModelSpec
 from .cost import estimate_cost, usage_cost
-from .dataset import Dish, manifest_hash
+from .dataset import Dish, dishes_hash, manifest_hash
 from .parsing import ParseError, parse_prediction
 from .paths import RESULTS_DIR, ROOT
 from .prompt import PROMPT, PROMPT_VERSION, prompt_hash
@@ -96,7 +96,7 @@ class RunConfigMismatch(RuntimeError):
     pass
 
 
-def _check_meta(meta_path: Path, spec: ModelSpec, fresh: bool) -> dict:
+def _check_meta(meta_path: Path, spec: ModelSpec, fresh: bool, answered: set[str]) -> dict:
     current = {
         "model_id": spec.id,
         "prompt_version": PROMPT_VERSION,
@@ -108,6 +108,14 @@ def _check_meta(meta_path: Path, spec: ModelSpec, fresh: bool) -> dict:
     }
     if meta_path.exists() and not fresh:
         old = json.loads(meta_path.read_text())
+        # The dataset may grow (new dishes added) as long as every dish this run already
+        # answered is unchanged; any edit to an answered dish still counts as a mismatch.
+        if (
+            old.get("manifest_hash") != current["manifest_hash"]
+            and old.get("run_dishes_hash")
+            and (dishes_hash(answered) == old["run_dishes_hash"])
+        ):
+            old["manifest_hash"] = current["manifest_hash"]
         for key in ("prompt_hash", "manifest_hash", "request_config"):
             if old.get(key) != current[key]:
                 raise RunConfigMismatch(
@@ -142,9 +150,10 @@ async def run_model(
     if fresh and pred_path.exists():
         stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         pred_path.rename(out_dir / f"predictions.{stamp}.bak.jsonl")
-    meta = _check_meta(meta_path, spec, fresh)
+    existing = read_records(pred_path)
+    meta = _check_meta(meta_path, spec, fresh, {r["dish_id"] for r in existing})
 
-    done = {(r["dish_id"], r.get("sample", 0)) for r in read_records(pred_path) if r.get("status") in FINAL_STATUSES}
+    done = {(r["dish_id"], r.get("sample", 0)) for r in existing if r.get("status") in FINAL_STATUSES}
     todo = [(d, s) for s in range(repeats) for d in dishes if (d.dish_id, s) not in done]
     summary = RunSummary(model_id=spec.id, planned=len(dishes) * repeats, skipped=len(dishes) * repeats - len(todo))
 
@@ -156,6 +165,7 @@ async def run_model(
             "caloriebench_version": __version__,
             "git_commit": _git_commit(),
             "updated_at": _now(),
+            "run_dishes_hash": dishes_hash({r["dish_id"] for r in existing}),
         }
     )
     meta_path.write_text(json.dumps(meta, indent=2) + "\n")
@@ -255,5 +265,6 @@ async def run_model(
     finally:
         await provider.aclose()
         meta["updated_at"] = _now()
+        meta["run_dishes_hash"] = dishes_hash({r["dish_id"] for r in read_records(pred_path)})
         meta_path.write_text(json.dumps(meta, indent=2) + "\n")
     return summary

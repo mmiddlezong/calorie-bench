@@ -22,14 +22,14 @@ Average error is how far a model's estimate was from the true calorie count, ave
 
 ## How the test works
 
-We gave each model 100 photos of real meals from a campus cafeteria, one at a time, and
+We gave each model 200 photos of real meals from a campus cafeteria, one at a time, and
 asked how many calories were on the plate. The photos come from
 [Nutrition5k](https://github.com/google-research-datasets/Nutrition5k), a research dataset
 in which every ingredient was weighed as the plate was put together, so the true calorie
 count of each plate is known.
 
-The plates range from half an ear of corn (31 calories) to a full plate of chicken,
-roasted potatoes and grains (920 calories). Every model saw the same photos and got the
+The plates range from half an ear of corn (31 calories) to a plate of pizza, chicken and
+pineapple (942 calories). Every model saw the same photos and got the
 same instructions.
 
 <p align="center">
@@ -69,7 +69,7 @@ the models you want to test.
 ```bash
 git clone https://github.com/mmiddlezong/calorie-bench && cd calorie-bench
 uv sync
-uv run caloriebench download            # the 100 photos, about 38 MB
+uv run caloriebench download            # the 200 photos, about 79 MB
 cp .env.example .env                    # then add your API keys
 uv run caloriebench estimate anthropic  # see what a run will cost before paying for it
 uv run caloriebench run anthropic
