@@ -164,32 +164,28 @@ def readme_block(scores: list[ModelScore], registry: Registry | None) -> str:
             return None
 
     lines = [
-        "| Rank | Model | Avg. calorie error | Within ±20% | Bias | Cost / 100 dishes |",
-        "|:---:|---|---:|---:|---:|---:|",
+        "| Rank | Model | Average error | Within 20% | Tends to guess | Cost for 100 photos |",
+        "|:---:|---|---:|---:|---|---:|",
     ]
-    rank = 0
-    for s in done:
+    for rank, s in enumerate(done, 1):
         sp = spec(s.model_id)
         name = sp.display_name if sp else s.model_id
+        lab = f" ({sp.lab})" if sp else ""
         c = s.calories
         lo, hi = c["mae_kcal_ci95"]
-        err = f"**{c['mae_kcal']:.0f} kcal** <sub>({lo:.0f}–{hi:.0f})</sub>"
-        rank += 1
-        medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, str(rank))
-        lab = f" <sub>{sp.lab}</sub>" if sp else ""
+        bias = c["mean_signed_error_kcal"]
+        lean = f"{abs(bias):.0f} too high" if bias >= 0 else f"{abs(bias):.0f} too low"
         cost = s.usage.get("cost_per_dish_usd", 0) * 100
         lines.append(
-            f"| {medal} | **{name}**{lab} | {err} | {_pct(c['within_20pct'], 0)} "
-            f"| {c['mean_signed_error_kcal']:+.0f} | ${cost:.2f} |"
+            f"| {rank} | **{name}**{lab} | **{c['mae_kcal']:.0f}** calories ({lo:.0f}–{hi:.0f}) "
+            f"| {_pct(c['within_20pct'], 0)} | {lean} | ${cost:.2f} |"
         )
-    n = done[0].n_total if done else 100
     lines += [
         "",
-        f"<sub>Mean absolute error of total calories on {n} real cafeteria plates (95% bootstrap CI). "
-        "Within ±20%: share of plates inside the FDA's nutrition-label tolerance. Bias: mean signed "
-        "error (negative = underestimates). Every model at high reasoning effort. Updated "
-        f"{datetime.now(UTC).strftime('%Y-%m-%d')}; full table in "
-        f"[`results/{PROMPT_VERSION}/leaderboard.md`](results/{PROMPT_VERSION}/leaderboard.md).</sub>",
+        "Average error is how far a model's estimate was from the true calorie count, averaged over "
+        "all 100 plates. The range in parentheses is a 95% confidence interval: when two models' ranges "
+        "overlap, the difference between them may be luck. \"Within 20%\" is the share of plates a "
+        f"model got within 20% of the truth. Updated {datetime.now(UTC).strftime('%B %-d, %Y')}.",
     ]
     return "\n".join(lines)
 

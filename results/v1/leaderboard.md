@@ -1,6 +1,6 @@
 # CalorieBench leaderboard (prompt v1)
 
-_Generated 2026-09-25 18:20 UTC. Ranked by mean absolute calorie error (lower is better). 95% CIs from 10,000 dish-level bootstrap resamples._
+_Generated 2026-09-25 18:38 UTC. Ranked by mean absolute calorie error (lower is better). 95% CIs from 10,000 dish-level bootstrap resamples._
 
 | # | Model | Calorie MAE, kcal (95% CI) | MAE % | Within ±20% | Median APE | MAPE | Bias (kcal) | r | Fail | Cost / 100 dishes | n |
 |---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
