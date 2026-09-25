@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Secrets
+.env
+
+# Downloaded benchmark images (fetch with `caloriebench download`)
+data/images/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

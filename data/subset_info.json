@@ -1,0 +1,41 @@
+{
+  "dataset": "Nutrition5k (Thames et al., CVPR 2021), https://github.com/google-research-datasets/Nutrition5k",
+  "license": "CC BY 4.0",
+  "split": "rgb_test_ids",
+  "n_dishes": 100,
+  "n_strata": 10,
+  "seed": 20260925,
+  "filters": {
+    "requires_overhead_rgb": true,
+    "min_kcal": 30.0,
+    "atwater_tolerance": 0.25
+  },
+  "pool_sizes": {
+    "test_split": 709,
+    "with_overhead_photo": 507,
+    "eligible_after_label_filters": 446
+  },
+  "stratum_kcal_edges": [
+    30.3,
+    57.4,
+    84.0,
+    126.5,
+    197.4,
+    248.2,
+    298.8,
+    354.3,
+    435.3,
+    540.7,
+    1050.5
+  ],
+  "rejected_during_draw": {
+    "dish_1562099053": "manual: food almost entirely outside the frame",
+    "dish_1565898432": "manual: neighboring plate with unlabeled food (olives, tomatoes, carrots) in frame"
+  },
+  "calories": {
+    "min": 30.8,
+    "median": 248.1,
+    "mean": 274.2,
+    "max": 920.1
+  }
+}
