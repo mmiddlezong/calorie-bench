@@ -184,7 +184,7 @@ def readme_block(scores: list[ModelScore], registry: Registry | None) -> str:
         "",
         "Average error is how far a model's estimate was from the true calorie count, averaged over "
         "all 100 plates. The range in parentheses is a 95% confidence interval: when two models' ranges "
-        "overlap, the difference between them may be luck. \"Within 20%\" is the share of plates a "
+        'overlap, the difference between them may be luck. "Within 20%" is the share of plates a '
         f"model got within 20% of the truth. Updated {datetime.now(UTC).strftime('%B %-d, %Y')}.",
     ]
     return "\n".join(lines)
