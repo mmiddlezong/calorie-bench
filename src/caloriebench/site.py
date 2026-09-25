@@ -43,9 +43,13 @@ def _thumbs(dishes: list[Dish], out_dir: Path) -> None:
         img.save(target, quality=72, optimize=True, progressive=True)
 
 
-def build_site(dishes: list[Dish], registry: Registry, site_dir: Path = SITE_DIR) -> Path:
+def build_site(
+    dishes: list[Dish], registry: Registry, site_dir: Path = SITE_DIR, include_incomplete: bool = False
+) -> Path:
     model_ids = discover_models()
     scores = score_all(dishes, model_ids)
+    if not include_incomplete:  # the public site shows finished runs only
+        scores = [s for s in scores if s.coverage >= 1]
 
     models = []
     for s in scores:
@@ -67,14 +71,14 @@ def build_site(dishes: list[Dish], registry: Registry, site_dir: Path = SITE_DIR
                 "n": s.n_dishes,
                 "coverage": _num(s.coverage, 3),
                 "fail_rate": _num(s.failure_rate, 3),
-                "mae": _num(c["mae_kcal"]),
-                "mae_ci": [_num(v) for v in c["mae_kcal_ci95"]],
+                "mae": _num(c["mae_kcal"], 2),
+                "mae_ci": [_num(v, 2) for v in c["mae_kcal_ci95"]],
                 "mae_pct": _num(c["mae_pct_of_mean"], 4),
                 "within20": _num(c["within_20pct"], 3),
                 "within20_ci": [_num(v, 3) for v in c["within_20pct_ci95"]],
                 "mdape": _num(c["mdape"], 4),
                 "mape": _num(c["mape"], 4),
-                "bias": _num(c["mean_signed_error_kcal"]),
+                "bias": _num(c["mean_signed_error_kcal"], 2),
                 "r": _num(c["pearson_r"], 3),
                 "cost_per_100": None if baseline else _num(u.get("cost_per_dish_usd", 0) * 100, 3),
                 "total_cost": _num(u.get("total_cost_usd", 0), 4),

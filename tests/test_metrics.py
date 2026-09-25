@@ -99,3 +99,13 @@ def test_compare_models_paired(dish_factory):
     assert c.diff == pytest.approx(-75)
     assert c.diff_ci95[1] < 0
     assert c.p_value < 0.05
+
+
+def test_readme_block_lists_complete_runs_only(dish_factory):
+    from caloriebench.report import readme_block
+
+    dishes = [dish_factory(i, 100.0 + i) for i in range(4)]
+    done = score_model("done", dishes, [rec(d, kcal=d.calories + 10) for d in dishes])
+    partial = score_model("partial", dishes, [rec(d, kcal=d.calories) for d in dishes[:2]])
+    block = readme_block([done, partial], None)
+    assert "**done**" in block and "partial" not in block

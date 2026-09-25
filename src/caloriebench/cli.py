@@ -290,8 +290,12 @@ def score(
         )
     console.print(table)
     if write:
+        from .report import update_readme
+
         md, js = write_leaderboard(scores, reg)
         console.print(f"[green]✓[/] wrote {md.relative_to(ROOT)} and {js.relative_to(ROOT)}")
+        if not model_names and update_readme(ROOT / "README.md", scores, reg):
+            console.print("[green]✓[/] updated the README leaderboard (complete runs only)")
 
 
 @app.command()
@@ -352,11 +356,15 @@ def worst(
 
 
 @app.command()
-def site() -> None:
+def site(
+    include_incomplete: Annotated[
+        bool, typer.Option(help="Also show runs that have not finished all dishes (for local previews).")
+    ] = False,
+) -> None:
     """Build the results website data (site/data.js + thumbnails) from stored predictions."""
     from .site import build_site
 
-    out = build_site(load_dishes(), load_registry())
+    out = build_site(load_dishes(), load_registry(), include_incomplete=include_incomplete)
     console.print(f"[green]✓[/] wrote {out.relative_to(ROOT)} — open site/index.html in a browser")
 
 

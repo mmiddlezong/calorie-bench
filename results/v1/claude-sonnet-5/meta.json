@@ -1,0 +1,26 @@
+{
+  "model_id": "claude-sonnet-5",
+  "prompt_version": "v1",
+  "prompt_hash": "cb252f13b2dfbd12",
+  "manifest_hash": "73c74f45f3af6c45",
+  "request_config": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-5",
+    "params": {
+      "effort": "high"
+    },
+    "structured_output": true,
+    "max_output_tokens": 16000
+  },
+  "started_at": "2026-09-25T17:55:52+00:00",
+  "display_name": "Claude Sonnet 5",
+  "lab": "Anthropic",
+  "pricing": {
+    "input": 2.0,
+    "output": 10.0,
+    "cached_input": 0.2
+  },
+  "caloriebench_version": "0.1.0",
+  "git_commit": "a2e7dcc",
+  "updated_at": "2026-09-25T18:00:17+00:00"
+}

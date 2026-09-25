@@ -151,3 +151,71 @@ def write_leaderboard(
         + "\n"
     )
     return md_path, json_path
+
+
+README_START = "<!-- LEADERBOARD:START -->"
+README_END = "<!-- LEADERBOARD:END -->"
+SITE_URL = "https://mmiddlezong.github.io/calorie-bench/"
+
+
+def readme_block(scores: list[ModelScore], registry: Registry | None) -> str:
+    """Leaderboard table for the top of the README: complete runs only."""
+    done = [s for s in scores if s.calories and s.coverage >= 1]
+
+    def spec(mid):
+        try:
+            return registry.get(mid) if registry is not None else None
+        except KeyError:
+            return None
+
+    lines = [
+        "| Rank | Model | Avg. calorie error | Within ±20% | Bias | Cost / 100 dishes |",
+        "|:---:|---|---:|---:|---:|---:|",
+    ]
+    rank = 0
+    for s in done:
+        sp = spec(s.model_id)
+        name = sp.display_name if sp else s.model_id
+        c = s.calories
+        lo, hi = c["mae_kcal_ci95"]
+        err = f"**{c['mae_kcal']:.0f} kcal** <sub>({lo:.0f}–{hi:.0f})</sub>"
+        if sp and sp.is_baseline:
+            lines.append(
+                f"| – | _{name}_ (baseline, ignores the photo) | {c['mae_kcal']:.0f} kcal "
+                f"| {_pct(c['within_20pct'], 0)} | {c['mean_signed_error_kcal']:+.0f} | – |"
+            )
+            continue
+        rank += 1
+        medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, str(rank))
+        lab = f" <sub>{sp.lab}</sub>" if sp else ""
+        cost = s.usage.get("cost_per_dish_usd", 0) * 100
+        lines.append(
+            f"| {medal} | **{name}**{lab} | {err} | {_pct(c['within_20pct'], 0)} "
+            f"| {c['mean_signed_error_kcal']:+.0f} | ${cost:.2f} |"
+        )
+    n = done[0].n_total if done else 100
+    lines += [
+        "",
+        f"<sub>Mean absolute error of total calories on {n} real cafeteria plates (95% bootstrap CI). "
+        "Within ±20%: share of plates inside the FDA's nutrition-label tolerance. Bias: mean signed "
+        "error (negative = underestimates). Every model at high reasoning effort. Updated "
+        f"{datetime.now(UTC).strftime('%Y-%m-%d')}; full table in "
+        f"[`results/{PROMPT_VERSION}/leaderboard.md`](results/{PROMPT_VERSION}/leaderboard.md).</sub>",
+    ]
+    return "\n".join(lines)
+
+
+def update_readme(readme: Path, scores: list[ModelScore], registry: Registry | None) -> bool:
+    """Replace the marked leaderboard block in the README. Returns True if it changed."""
+    if not readme.exists():
+        return False
+    text = readme.read_text()
+    if README_START not in text or README_END not in text:
+        return False
+    head, rest = text.split(README_START, 1)
+    _, tail = rest.split(README_END, 1)
+    new = f"{head}{README_START}\n{readme_block(scores, registry)}\n{README_END}{tail}"
+    if new != text:
+        readme.write_text(new)
+        return True
+    return False
