@@ -1,18 +1,18 @@
 # CalorieBench leaderboard (prompt v1)
 
-_Generated 2026-09-25 19:13 UTC. Ranked by mean absolute calorie error (lower is better). 95% CIs from 10,000 dish-level bootstrap resamples._
+_Generated 2026-09-25 19:19 UTC. Ranked by mean absolute calorie error (lower is better). 95% CIs from 10,000 dish-level bootstrap resamples._
 
-| # | Model | Calorie MAE, kcal (95% CI) | MAE % | Within ±20% | Median APE | MAPE | Bias (kcal) | r | Fail | Cost / 100 dishes | n |
+| # | Model | Calorie MAE, kcal (95% CI) | MAE % | Within ±20% | Median APE | MAPE | Bias (kcal) | r | Fail | Cost | n |
 |---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | **Claude Fable 5.1** | 82 (70–96) | 30% | 40% | 27% | 32% | -38 | 0.81 | 0% | $1.86 | 200/200 |
-| 2 | **Claude Opus 5.5** | 91 (79–105) | 33% | 34% | 29% | 44% | +23 | 0.78 | 0% | $0.88 | 200/200 |
-| 3 | **Claude Sonnet 5** | 101 (88–114) | 36% | 36% | 31% | 47% | +20 | 0.76 | 0% | $0.38 | 200/200 |
-| 4 | **GPT-6 Luna** | 112 (98–127) | 40% | 27% | 35% | 52% | +51 | 0.78 | 0% | $0.05 | 200/200 |
-| 5 | **GPT-6 Sol** | 127 (112–142) | 46% | 26% | 41% | 63% | +83 | 0.79 | 0% | $0.96 | 200/200 |
-| 6 | **Claude Haiku 4.5** | 139 (123–156) | 50% | 27% | 43% | 79% | +62 | 0.65 | 0% | $0.99 | 200/200 |
-| 7 | **GPT-6 Astra** | 145 (129–162) | 52% | 22% | 53% | 72% | +118 | 0.82 | 0% | $5.83 | 200/200 |
+| 1 | **Claude Fable 5.1** | 82 (70–96) | 30% | 40% | 27% | 32% | -38 | 0.81 | 0% | $3.71 | 200/200 |
+| 2 | **Claude Opus 5.5** | 91 (79–105) | 33% | 34% | 29% | 44% | +23 | 0.78 | 0% | $1.76 | 200/200 |
+| 3 | **Claude Sonnet 5** | 101 (88–114) | 36% | 36% | 31% | 47% | +20 | 0.76 | 0% | $0.77 | 200/200 |
+| 4 | **GPT-6 Luna** | 112 (98–127) | 40% | 27% | 35% | 52% | +51 | 0.78 | 0% | $0.10 | 200/200 |
+| 5 | **GPT-6 Sol** | 127 (112–142) | 46% | 26% | 41% | 63% | +83 | 0.79 | 0% | $1.91 | 200/200 |
+| 6 | **Claude Haiku 4.5** | 139 (123–156) | 50% | 27% | 43% | 79% | +62 | 0.65 | 0% | $1.99 | 200/200 |
+| 7 | **GPT-6 Astra** | 145 (129–162) | 52% | 22% | 53% | 72% | +118 | 0.82 | 0% | $11.66 | 200/200 |
 
-**Columns.** *MAE*: mean absolute error of total calories vs. the ground truth (computed from weighed ingredients). *MAE %*: MAE as a share of the mean true calories (Nutrition5k paper metric). *Within ±20%*: share of dishes estimated within 20% of the true value (the FDA's tolerance for nutrition labels). *Median APE* / *MAPE*: median / mean absolute percentage error. *Bias*: mean signed error (negative = underestimates). *r*: Pearson correlation of predicted vs. true calories. *Fail*: unparseable answers, refusals, and truncations (scored as predicting 0). *Cost*: actual API spend per 100 dishes at list prices. ⚠ = incomplete run.
+**Columns.** *MAE*: mean absolute error of total calories vs. the ground truth (computed from weighed ingredients). *MAE %*: MAE as a share of the mean true calories (Nutrition5k paper metric). *Within ±20%*: share of dishes estimated within 20% of the true value (the FDA's tolerance for nutrition labels). *Median APE* / *MAPE*: median / mean absolute percentage error. *Bias*: mean signed error (negative = underestimates). *r*: Pearson correlation of predicted vs. true calories. *Fail*: unparseable answers, refusals, and truncations (scored as predicting 0). *Cost*: API spend to run every dish once, at list prices. ⚠ = incomplete run.
 
 ## Macronutrients and mass
 

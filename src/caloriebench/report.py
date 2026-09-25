@@ -54,7 +54,7 @@ def leaderboard_markdown(scores: list[ModelScore], registry: Registry | None, re
         "dish-level bootstrap resamples._",
         "",
         "| # | Model | Calorie MAE, kcal (95% CI) | MAE % | Within ±20% | Median APE | MAPE "
-        "| Bias (kcal) | r | Fail | Cost / 100 dishes | n |",
+        "| Bias (kcal) | r | Fail | Cost | n |",
         "|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     rank = 0
@@ -73,7 +73,7 @@ def leaderboard_markdown(scores: list[ModelScore], registry: Registry | None, re
         rank += 1
         label, rank_str = f"**{name}**", str(rank)
         lo, hi = c["mae_kcal_ci95"]
-        cost = s.usage.get("cost_per_dish_usd", 0.0) * 100
+        cost = s.usage.get("projected_cost_full_run_usd", 0.0)
         n = f"{s.n_dishes}/{s.n_total}" + ("" if s.coverage == 1 else " ⚠")
         lines.append(
             f"| {rank_str} | {label} | {c['mae_kcal']:.0f} ({lo:.0f}–{hi:.0f}) | {_pct(c['mae_pct_of_mean'], 0)} "
@@ -91,7 +91,7 @@ def leaderboard_markdown(scores: list[ModelScore], registry: Registry | None, re
         "tolerance for nutrition labels). *Median APE* / *MAPE*: median / mean absolute "
         "percentage error. *Bias*: mean signed error (negative = underestimates). *r*: Pearson "
         "correlation of predicted vs. true calories. *Fail*: unparseable answers, refusals, "
-        "and truncations (scored as predicting 0). *Cost*: actual API spend per 100 dishes at "
+        "and truncations (scored as predicting 0). *Cost*: API spend to run every dish once, at "
         "list prices. ⚠ = incomplete run.",
         "",
         "## Macronutrients and mass",
@@ -164,7 +164,7 @@ def readme_block(scores: list[ModelScore], registry: Registry | None) -> str:
             return None
 
     lines = [
-        "| Rank | Model | Average error | Within 20% | Tends to guess | Cost per 100 photos |",
+        "| Rank | Model | Average error | Within 20% | Tends to guess | Cost |",
         "|:---:|---|---:|---:|---|---:|",
     ]
     for rank, s in enumerate(done, 1):
@@ -175,7 +175,7 @@ def readme_block(scores: list[ModelScore], registry: Registry | None) -> str:
         lo, hi = c["mae_kcal_ci95"]
         bias = c["mean_signed_error_kcal"]
         lean = f"{abs(bias):.0f} too high" if bias >= 0 else f"{abs(bias):.0f} too low"
-        cost = s.usage.get("cost_per_dish_usd", 0) * 100
+        cost = s.usage.get("projected_cost_full_run_usd", 0.0)
         lines.append(
             f"| {rank} | **{name}**{lab} | **{c['mae_kcal']:.0f}** calories ({lo:.0f}–{hi:.0f}) "
             f"| {_pct(c['within_20pct'], 0)} | {lean} | ${cost:.2f} |"
@@ -185,7 +185,8 @@ def readme_block(scores: list[ModelScore], registry: Registry | None) -> str:
         "Average error is how far a model's estimate was from the true calorie count, averaged over "
         "all the plates. The range in parentheses is a 95% confidence interval: when two models' ranges "
         'overlap, the difference between them may be luck. "Within 20%" is the share of plates a '
-        f"model got within 20% of the truth. Updated {datetime.now(UTC).strftime('%B %-d, %Y')}.",
+        f'model got within 20% of the truth. "Cost" is the API bill for one run over all the photos. '
+        f"Updated {datetime.now(UTC).strftime('%B %-d, %Y')}.",
     ]
     return "\n".join(lines)
 

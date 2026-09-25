@@ -421,7 +421,7 @@ const COLS = {
   cal: [
     [null, "#"], ["name", "Model"], ["mae", "Average error", "Average gap between the estimate and the weighed truth, in kcal. Range is the 95% confidence interval."],
     ["within20", "Within 20%", "Share of plates estimated within 20% of the truth"], ["bias", "Bias", "Average signed error in kcal. Negative means the model tends to underestimate."],
-    ["cost_per_100", "Cost per 100 plates", "API cost at list prices"], ["latency", "Time per plate", "Median response time"],
+    ["cost", "Cost", "API cost to run every plate once, at list prices"], ["latency", "Time per plate", "Median response time"],
   ],
   mac: [
     [null, "#"], ["name", "Model"], ["mass", "Weight error (g)", "Average gap from the weighed weight, and that gap as a share of the average plate"],
@@ -452,7 +452,7 @@ function renderLB() {
     if (view === "cal") {
       cells = `<td><span class="ci">${ciBar(m)}<span class="big">${f0(m.mae)}</span><span class="r">${f0(m.mae_ci?.[0])}–${f0(m.mae_ci?.[1])}</span></span></td>
         <td>${pct(m.within20)}</td><td>${signed(m.bias)}</td>
-        <td>${usd(m.cost_per_100)}</td><td>${m.latency ? m.latency.toFixed(1) + " s" : ""}</td>`;
+        <td>${usd(m.cost)}</td><td>${m.latency ? m.latency.toFixed(1) + " s" : ""}</td>`;
     } else {
       const mc = (k, dp) => m.macros?.[k] ? `${m.macros[k].mae.toFixed(dp)} <span class="lab">${pct(m.macros[k].pct)}</span>` : "";
       cells = `<td>${mc("mass_g", 0)}</td><td>${mc("protein_g", 1)}</td><td>${mc("carbs_g", 1)}</td><td>${mc("fat_g", 1)}</td>
@@ -539,12 +539,12 @@ function axisY(svg, M, H, text) {
 // ---------- accuracy vs cost: quadrant chart, better is up and to the left
 function renderCost() {
   const host = $("#chart-cost"); host.innerHTML = "";
-  const pts = real.filter(m => m.cost_per_100 > 0);
+  const pts = real.filter(m => m.cost > 0);
   if (!pts.length) { host.innerHTML = '<div class="empty">No results yet.</div>'; return; }
   const W = Math.max(320, host.clientWidth), H = Math.round(Math.min(520, Math.max(320, W * 0.5)));
   const M = {t: 14, r: 16, b: 46, l: 52};
-  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Average calorie error against cost per 100 plates"}, host);
-  const costs = pts.map(m => m.cost_per_100), errs = pts.map(m => m.mae);
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Average calorie error against cost"}, host);
+  const costs = pts.map(m => m.cost), errs = pts.map(m => m.mae);
   let x0 = Math.min(...costs) / 1.8, x1 = Math.max(...costs) * 1.8;
   if (x1 / x0 < 12) { const c = Math.sqrt(x0 * x1); x0 = c / 3.5; x1 = c * 3.5; }
   const yMax = Math.max(...errs) * 1.18;
@@ -565,7 +565,7 @@ function renderCost() {
   for (const v of logTicks(x0, x1))
     el("text", {x: X(v), y: B + 18, "text-anchor": "middle", class: "tick"}, svg).textContent = "$" + (v < 1 ? v : v.toFixed(0));
   el("line", {x1: L, x2: R, y1: B, y2: B, stroke: "var(--rule)", "stroke-width": 1.5}, svg);
-  el("text", {x: (L + R) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "Cost per 100 plates (log scale)";
+  el("text", {x: (L + R) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "Cost (log scale)";
   axisY(svg, M, H, "Average error (kcal)");
 
   // reference lines: most accurate model and cheapest model
@@ -580,13 +580,13 @@ function renderCost() {
   occupied.push({x: X(cheap) - 18, y: cy - 60, w: 14, h: 60});
 
   // Pareto frontier: models no cheaper model beats on accuracy
-  const sorted = [...pts].sort((a, b) => a.cost_per_100 - b.cost_per_100);
+  const sorted = [...pts].sort((a, b) => a.cost - b.cost);
   const frontier = []; let bestErr = Infinity;
   for (const m of sorted) if (m.mae < bestErr) { frontier.push(m); bestErr = m.mae; }
   const onF = new Set(frontier.map(m => m.id));
   if (frontier.length > 1)
-    el("polyline", {points: frontier.map(m => `${X(m.cost_per_100)},${Y(m.mae)}`).join(" "), fill: "none", stroke: "var(--mark)", "stroke-width": 2, opacity: .6}, svg);
-  const items = pts.map(m => ({m, x: X(m.cost_per_100), y: Y(m.mae), text: m.name}));
+    el("polyline", {points: frontier.map(m => `${X(m.cost)},${Y(m.mae)}`).join(" "), fill: "none", stroke: "var(--mark)", "stroke-width": 2, opacity: .6}, svg);
+  const items = pts.map(m => ({m, x: X(m.cost), y: Y(m.mae), text: m.name}));
   for (const it of items)
     el("circle", {cx: it.x, cy: it.y, r: 7, fill: onF.has(it.m.id) ? "var(--mark)" : "var(--muted)", stroke: "var(--bg)", "stroke-width": 2}, svg);
   placeLabels([...items].sort((a, b) => onF.has(b.m.id) - onF.has(a.m.id) || a.m.mae - b.m.mae), {x0: L, x1: R + 10, y0: T, y1: B}, occupied);
@@ -597,7 +597,7 @@ function renderCost() {
      <tr><td>Average error</td><td>${f0(p.m.mae)} kcal</td></tr>
      <tr><td>95% range</td><td>${f0(p.m.mae_ci[0])}–${f0(p.m.mae_ci[1])}</td></tr>
      <tr><td>Within 20%</td><td>${pct(p.m.within20)}</td></tr>
-     <tr><td>Cost per 100 plates</td><td>${usd(p.m.cost_per_100)}</td></tr></table>`, e.clientX, e.clientY));
+     <tr><td>Cost</td><td>${usd(p.m.cost)}</td></tr></table>`, e.clientX, e.clientY));
 }
 
 // ---------- horizontal bar charts

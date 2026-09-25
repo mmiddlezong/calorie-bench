@@ -79,7 +79,7 @@ def build_site(
                 "mape": _num(c["mape"], 4),
                 "bias": _num(c["mean_signed_error_kcal"], 2),
                 "r": _num(c["pearson_r"], 3),
-                "cost_per_100": _num(u.get("cost_per_dish_usd", 0) * 100, 3),
+                "cost": _num(u.get("projected_cost_full_run_usd", 0), 3),  # whole benchmark, one pass
                 "total_cost": _num(u.get("total_cost_usd", 0), 4),
                 "latency": _num(u.get("median_latency_s"), 2),
                 "out_tokens": _num(u.get("mean_output_tokens"), 0),

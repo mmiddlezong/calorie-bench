@@ -7,17 +7,17 @@ How accurately can AI models count the calories in a photo of your food?
 ## Results
 
 <!-- LEADERBOARD:START -->
-| Rank | Model | Average error | Within 20% | Tends to guess | Cost per 100 photos |
+| Rank | Model | Average error | Within 20% | Tends to guess | Cost |
 |:---:|---|---:|---:|---|---:|
-| 1 | **Claude Fable 5.1** (Anthropic) | **82** calories (70–96) | 40% | 38 too low | $1.86 |
-| 2 | **Claude Opus 5.5** (Anthropic) | **91** calories (79–105) | 34% | 23 too high | $0.88 |
-| 3 | **Claude Sonnet 5** (Anthropic) | **101** calories (88–114) | 36% | 20 too high | $0.38 |
-| 4 | **GPT-6 Luna** (OpenAI) | **112** calories (98–127) | 27% | 51 too high | $0.05 |
-| 5 | **GPT-6 Sol** (OpenAI) | **127** calories (112–142) | 26% | 83 too high | $0.96 |
-| 6 | **Claude Haiku 4.5** (Anthropic) | **139** calories (123–156) | 27% | 62 too high | $0.99 |
-| 7 | **GPT-6 Astra** (OpenAI) | **145** calories (129–162) | 22% | 118 too high | $5.83 |
+| 1 | **Claude Fable 5.1** (Anthropic) | **82** calories (70–96) | 40% | 38 too low | $3.71 |
+| 2 | **Claude Opus 5.5** (Anthropic) | **91** calories (79–105) | 34% | 23 too high | $1.76 |
+| 3 | **Claude Sonnet 5** (Anthropic) | **101** calories (88–114) | 36% | 20 too high | $0.77 |
+| 4 | **GPT-6 Luna** (OpenAI) | **112** calories (98–127) | 27% | 51 too high | $0.10 |
+| 5 | **GPT-6 Sol** (OpenAI) | **127** calories (112–142) | 26% | 83 too high | $1.91 |
+| 6 | **Claude Haiku 4.5** (Anthropic) | **139** calories (123–156) | 27% | 62 too high | $1.99 |
+| 7 | **GPT-6 Astra** (OpenAI) | **145** calories (129–162) | 22% | 118 too high | $11.66 |
 
-Average error is how far a model's estimate was from the true calorie count, averaged over all the plates. The range in parentheses is a 95% confidence interval: when two models' ranges overlap, the difference between them may be luck. "Within 20%" is the share of plates a model got within 20% of the truth. Updated September 25, 2026.
+Average error is how far a model's estimate was from the true calorie count, averaged over all the plates. The range in parentheses is a 95% confidence interval: when two models' ranges overlap, the difference between them may be luck. "Within 20%" is the share of plates a model got within 20% of the truth. "Cost" is the API bill for one run over all the photos. Updated September 25, 2026.
 <!-- LEADERBOARD:END -->
 
 ## How the test works
@@ -48,8 +48,8 @@ calories, every Claude model guessed far too low, Claude Fable 5.1 by 209 calori
 average. The GPT-6 models leaned the other way: all three guessed too high on average, and
 GPT-6 Astra by 118 calories per plate.
 
-**Price is a poor guide to accuracy.** GPT-6 Luna costs 5 cents per 100 photos and beat
-GPT-6 Astra, which costs more than 100 times as much.
+**Price is a poor guide to accuracy.** GPT-6 Luna cost 10 cents to run on all 200 photos
+and beat GPT-6 Astra, which cost more than 100 times as much.
 
 If you use an app that estimates calories from photos, treat its number as a rough
 starting point, especially for large or mixed plates.

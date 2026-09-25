@@ -293,7 +293,7 @@ def score(
     scores = score_all(dishes, available)
 
     table = Table(title=f"CalorieBench (prompt {PROMPT_VERSION}) — ranked by calorie MAE")
-    for col in ("model", "MAE kcal", "95% CI", "MAE %", "±20%", "MdAPE", "bias", "fail", "$/100", "n"):
+    for col in ("model", "MAE kcal", "95% CI", "MAE %", "±20%", "MdAPE", "bias", "fail", "cost", "n"):
         table.add_column(col, justify="left" if col == "model" else "right")
     for s in scores:
         c = s.calories
@@ -309,7 +309,7 @@ def score(
             f"{100 * c['mdape']:.0f}%",
             f"{c['mean_signed_error_kcal']:+.0f}",
             f"{100 * s.failure_rate:.0f}%",
-            f"${100 * s.usage.get('cost_per_dish_usd', 0):.2f}",
+            f"${s.usage.get('projected_cost_full_run_usd', 0):.2f}",
             f"{s.n_dishes}/{s.n_total}",
         )
     console.print(table)
