@@ -31,8 +31,8 @@ uv run caloriebench download          # fetch the 100 images (~38 MB) from the p
 cp .env.example .env                  # then add the API keys you have
 uv run caloriebench models            # shows which models have keys configured
 uv run caloriebench estimate frontier # cost estimate; sends nothing
-uv run caloriebench run smoke -n 3    # ~$0.04: one cheap model per provider on 3 dishes, checks every key
-uv run caloriebench run frontier      # the headline models (≈ $33 expected); asks before spending
+uv run caloriebench run smoke -n 3    # ~$0.10: one cheap model per provider on 3 dishes, checks every key
+uv run caloriebench run frontier      # the headline models (≈ $32 expected); asks before spending
 uv run caloriebench score             # writes results/v1/leaderboard.md
 ```
 
@@ -60,44 +60,44 @@ Other commands: `caloriebench compare A B` (paired significance test),
 
 ## Cost estimates
 
-Estimated API cost for one full pass over the 100 dishes, at list prices verified on
-**2026-09-25** (regenerate with `uv run caloriebench estimate --markdown`):
+Estimated API cost for one full pass over the 100 dishes, with every model at high reasoning
+effort, at list prices verified on **2026-09-25** (regenerate with `uv run caloriebench estimate --markdown`):
 
 | Model | Lab | Price in / out ($/1M) | Tokens in / out per dish | Expected (100 dishes) | Range |
 |---|---|---:|---:|---:|---:|
 | Claude Fable 5.1 | Anthropic | $10 / $50 | 744 / 1,800 | **$9.74** | $5.99–$20.99 |
-| Claude Opus 5.5 | Anthropic | $4 / $20 | 744 / 1,100 | **$2.50** | $1.70–$4.90 |
+| Claude Opus 5.5 | Anthropic | $4 / $20 | 744 / 1,800 | **$3.90** | $2.40–$8.40 |
 | Claude Sonnet 5 | Anthropic | $2 / $10 | 744 / 1,500 | **$1.65** | $1.05–$3.45 |
-| Claude Haiku 4.5 | Anthropic | $1 / $5 | 744 / 300 | **$0.22** | $0.22–$0.22 |
-| GPT-6 Astra | OpenAI | $10 / $50 | 690 / 700 | **$4.19** | $3.19–$7.19 |
-| GPT-6 Sol | OpenAI | $2 / $10 | 690 / 900 | **$1.04** | $0.74–$1.94 |
-| GPT-6 Luna | OpenAI | $0.1 / $0.5 | 690 / 1,800 | **$0.10** | $0.06–$0.21 |
-| Gemini 3.8 Flash | Google | $0.75 / $3.75 | 1,450 / 2,800 | **$1.16** | $0.69–$2.56 |
+| Claude Haiku 4.5 | Anthropic | $1 / $5 | 744 / 1,800 | **$0.97** | $0.60–$2.10 |
+| GPT-6 Astra | OpenAI | $10 / $50 | 690 / 800 | **$4.69** | $3.44–$8.44 |
+| GPT-6 Sol | OpenAI | $2 / $10 | 690 / 1,300 | **$1.44** | $0.94–$2.94 |
+| GPT-6 Luna | OpenAI | $0.1 / $0.5 | 690 / 2,800 | **$0.15** | $0.08–$0.33 |
+| Gemini 3.8 Flash | Google | $0.75 / $3.75 | 1,450 / 4,800 | **$1.91** | $1.06–$4.44 |
 | Gemini 3.1 Pro (preview) | Google | $2 / $12 | 1,450 / 3,300 | **$4.25** | $2.45–$9.65 |
-| Gemini 3.5 Flash-Lite | Google | $0.3 / $2.5 | 1,450 / 1,300 | **$0.37** | $0.24–$0.74 |
+| Gemini 3.5 Flash-Lite | Google | $0.3 / $2.5 | 1,450 / 3,300 | **$0.87** | $0.49–$1.99 |
 | Grok 4.7 | xAI | $2 / $6 | 1,930 / 3,300 | **$2.37** | $1.47–$5.07 |
-| Grok 4.3 | xAI | $1.25 / $2.5 | 1,930 / 1,100 | **$0.52** | $0.42–$0.82 |
-| Kimi K3 | Moonshot AI (open weights) | $3 / $15 | 1,330 / 5,800 | **$9.10** | $4.97–$21.47 |
+| Grok 4.3 | xAI | $1.25 / $2.5 | 1,930 / 3,300 | **$1.07** | $0.69–$2.19 |
+| Kimi K3 | Moonshot AI (open weights) | $3 / $15 | 1,330 / 3,300 | **$5.35** | $3.10–$12.10 |
 | Qwen3.8 Flash | Alibaba (open weights) | $0.15 / $0.47 | 630 / 3,300 | **$0.16** | $0.09–$0.38 |
 | Ling 3.0 Flash VL | inclusionAI (open weights) | $0.06 / $0.18 | 630 / 3,300 | **$0.06** | $0.04–$0.14 |
 | MiniMax-M3 | MiniMax (open weights) | $0.3 / $1.2 | 830 / 6,200 | **$0.77** | $0.41–$1.83 |
-| **Total** | | | | **$38.19** | $23.74–$81.57 |
+| **Total** | | | | **$39.34** | $24.31–$84.44 |
 
 | Group | What | Expected | Range |
 |---|---|---:|---:|
-| `smoke -n 3` | cheapest model per provider, 3 dishes: checks keys and plumbing | **$0.04** | $0.03–$0.07 |
-| `frontier -n 10` | headline models, 10 calorie-balanced dishes | **$3.33** | $2.05–$7.18 |
-| `budget` | 9 cheaper models, full run | **$4.89** | $3.28–$9.73 |
-| `frontier` | 7 headline models, full run | **$33.31** | $20.46–$71.84 |
-| `all` | all 16 models, full run | **$38.19** | $23.74–$81.57 |
+| `smoke -n 3` | cheapest model per provider, 3 dishes: checks keys and plumbing | **$0.10** | $0.06–$0.21 |
+| `frontier -n 10` | headline models, 10 calorie-balanced dishes | **$3.22** | $1.99–$6.91 |
+| `budget` | 9 cheaper models, full run | **$7.14** | $4.40–$15.36 |
+| `frontier` | 7 headline models, full run | **$32.21** | $19.91–$69.09 |
+| `all` | all 16 models, full run | **$39.34** | $24.31–$84.44 |
 
 How to read this:
 
 * **The uncertainty is almost entirely hidden reasoning tokens**, which are billed as
   output. Per-model assumptions come from Artificial Analysis MMMU-Pro token counts where
   available (noted in [`configs/models.yaml`](configs/models.yaml)). The range is 0.5× to
-  2.5× that assumption. Two models are pricier than their per-token rates suggest: Kimi K3
-  reasons at `max` effort by default, and Claude Fable 5.1 has the highest output price.
+  2.5× that assumption. Claude Fable 5.1 is the most expensive because it has the highest
+  output price, and it reasons on every request.
 * **Image tokens differ a lot by provider.** A 640×480 photo costs 414 tokens on Claude,
   360 on GPT-6, 1,120 on Gemini (`media_resolution=high`), and roughly 1,600 on Grok
   (undocumented; the real number is logged on the first run).
@@ -158,10 +158,28 @@ plate totals as JSON:
 * **Structured output** (JSON-schema-constrained decoding) is used wherever the provider
   supports it. A forgiving parser handles code fences, surrounding prose, and numbers
   written as strings.
-* **Reasoning effort is left at each provider's API default**, and set explicitly in the
-  config so it is visible and reproducible (see the `reasoning` field in
-  [`configs/models.yaml`](configs/models.yaml)). To benchmark another setting, add an
-  entry with a new id, e.g. `gpt-6-astra-high`.
+* **Every model runs at high reasoning effort**: each vendor's own "think carefully" level,
+  set explicitly in every request so a change in a provider's default can never silently
+  change results (a test enforces this). "High" is not identical compute across vendors,
+  but it removes the large imbalances between API defaults, which range from no reasoning
+  (Claude Haiku 4.5, Gemini 3.5 Flash-Lite) to `max` (Kimi K3). See the table below. To
+  benchmark another setting, add an entry with a new id, e.g. `gpt-6-astra-low`.
+
+| Model | Setting sent | API default |
+|---|---|---|
+| Claude Fable 5.1, Sonnet 5 | `effort: high` (adaptive thinking) | same |
+| Claude Opus 5.5 | `effort: high` (adaptive thinking) | medium |
+| Claude Haiku 4.5 | extended thinking, 8,000-token budget (no effort setting) | no thinking |
+| GPT-6 Astra | `reasoning.effort: high` | not documented |
+| GPT-6 Sol, Luna | `reasoning.effort: high` | medium |
+| Gemini 3.8 Flash | `thinking_level: high` | medium |
+| Gemini 3.1 Pro | `thinking_level: high` | same |
+| Gemini 3.5 Flash-Lite | `thinking_level: high` | minimal |
+| Grok 4.7 | `reasoning.effort: high` | same |
+| Grok 4.3 | `reasoning.effort: high` | low |
+| Kimi K3 | `reasoning.effort: high` | max |
+| Qwen3.8 Flash, Ling 3.0 Flash VL, MiniMax-M3 | reasoning enabled (no effort levels) | on (MiniMax: not documented) |
+
 * **Sampling parameters are left at provider defaults.** Several current reasoning models
   reject `temperature`.
 * **No refusal fallbacks or model routing.** A refusal counts against the model that

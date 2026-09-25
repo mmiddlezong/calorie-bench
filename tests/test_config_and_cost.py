@@ -59,3 +59,26 @@ def test_manifest_prefix_is_calorie_balanced():
     assert len({d.dish_id for d in dishes}) == 100
     assert sorted(d.calorie_stratum for d in dishes[:10]) == list(range(10))
     assert all(d.calories >= 30 for d in dishes)
+
+
+def test_every_model_pins_reasoning_explicitly():
+    """Policy: every model runs at high reasoning effort set explicitly in the request, so a
+    change in a provider's default can never silently change results."""
+    for m in load_registry().models:
+        if m.is_baseline:
+            continue
+        req = make_provider(m).build_request(b"img", "image/png", PROMPT)
+        if m.provider == "anthropic":
+            effort = req.get("output_config", {}).get("effort")
+            thinking = req.get("thinking", {})
+            assert effort == "high" or (
+                thinking.get("type") == "enabled" and 1024 <= thinking["budget_tokens"] < req["max_tokens"]
+            ), m.id
+        elif m.provider in ("openai", "xai"):
+            assert req.get("reasoning") == {"effort": "high"}, m.id
+        elif m.provider == "google":
+            assert req["config"].get("thinking_config") == {"thinking_level": "HIGH"}, m.id
+        elif m.provider == "openrouter":
+            assert req["extra_body"]["reasoning"] in ({"effort": "high"}, {"enabled": True}), m.id
+        else:
+            raise AssertionError(f"no reasoning policy check for provider {m.provider}")

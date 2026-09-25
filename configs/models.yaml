@@ -17,6 +17,11 @@
 #           src/caloriebench/providers/. Sampling parameters (temperature etc.) are left
 #           at provider defaults; several of these models reject them.
 #
+# Reasoning policy: every model runs at "high" reasoning effort (each vendor's own
+# "think carefully" level), set EXPLICITLY here so a change in a provider's default can
+# never silently change results. Models without effort levels get reasoning explicitly
+# enabled (Qwen, Ling, MiniMax) or an extended-thinking budget (Claude Haiku 4.5).
+#
 # Prices verified 2026-09-25 against:
 #   Anthropic  https://platform.claude.com/docs/en/about-claude/pricing
 #   OpenAI     https://developers.openai.com/api/docs/pricing
@@ -43,7 +48,7 @@ models:
     model: claude-fable-5-1
     groups: [frontier, anthropic]
     params: {effort: high}
-    reasoning: "adaptive thinking (always on), effort=high (API default)"
+    reasoning: "adaptive thinking (always on), effort=high (also the API default)"
     pricing: {input: 10.00, output: 50.00, cached_input: 0.25}
     estimate: {image_tokens: 414, reasoning_tokens: 1500}
 
@@ -53,10 +58,10 @@ models:
     provider: anthropic
     model: claude-opus-5-5
     groups: [frontier, anthropic]
-    params: {effort: medium}
-    reasoning: "adaptive thinking (always on), effort=medium (API default for Opus 5.5)"
+    params: {effort: high}
+    reasoning: "adaptive thinking (always on), effort=high (API default is medium)"
     pricing: {input: 4.00, output: 20.00, cached_input: 0.20}
-    estimate: {image_tokens: 414, reasoning_tokens: 800}
+    estimate: {image_tokens: 414, reasoning_tokens: 1500}
 
   - id: claude-sonnet-5
     display_name: Claude Sonnet 5
@@ -65,7 +70,7 @@ models:
     model: claude-sonnet-5
     groups: [budget, anthropic]
     params: {effort: high}
-    reasoning: "adaptive thinking (default on), effort=high (API default)"
+    reasoning: "adaptive thinking (default on), effort=high (also the API default)"
     pricing: {input: 2.00, output: 10.00, cached_input: 0.20}
     estimate: {image_tokens: 414, reasoning_tokens: 1200}
 
@@ -75,10 +80,11 @@ models:
     provider: anthropic
     model: claude-haiku-4-5
     groups: [budget, anthropic, smoke]
-    params: {}
-    reasoning: "no extended thinking (API default)"
+    # Haiku 4.5 has no effort parameter; extended thinking takes a token budget instead.
+    params: {thinking: {type: enabled, budget_tokens: 8000}}
+    reasoning: "extended thinking, 8,000-token budget (API default is no thinking)"
     pricing: {input: 1.00, output: 5.00, cached_input: 0.10}
-    estimate: {image_tokens: 414, reasoning_tokens: 0}
+    estimate: {image_tokens: 414, reasoning_tokens: 1500}
 
   # ------------------------------------------------------------------ OpenAI (Responses API)
   # Image tokens: 32x32 patches * 1.2 -> 20 * 15 * 1.2 = 360 at detail=high.
@@ -89,11 +95,11 @@ models:
     provider: openai
     model: gpt-6-astra
     groups: [frontier, openai]
-    params: {reasoning_effort: medium}
+    params: {reasoning_effort: high}
     max_output_tokens: 25000
-    reasoning: "reasoning effort=medium (default not documented; set explicitly)"
+    reasoning: "reasoning effort=high (API default not documented)"
     pricing: {input: 10.00, output: 50.00, cached_input: 1.00}
-    estimate: {image_tokens: 360, reasoning_tokens: 400}  # AA MMMU-Pro: 282 at high
+    estimate: {image_tokens: 360, reasoning_tokens: 500}  # AA MMMU-Pro: 282 at high
 
   - id: gpt-6-sol
     display_name: GPT-6 Sol
@@ -101,11 +107,11 @@ models:
     provider: openai
     model: gpt-6-sol
     groups: [budget, openai]
-    params: {reasoning_effort: medium}
+    params: {reasoning_effort: high}
     max_output_tokens: 25000
-    reasoning: "reasoning effort=medium (API default)"
+    reasoning: "reasoning effort=high (API default is medium)"
     pricing: {input: 2.00, output: 10.00, cached_input: 0.20}
-    estimate: {image_tokens: 360, reasoning_tokens: 600}  # AA MMMU-Pro: 1,643 at max
+    estimate: {image_tokens: 360, reasoning_tokens: 1000}  # AA MMMU-Pro: 1,643 at max
 
   - id: gpt-6-luna
     display_name: GPT-6 Luna
@@ -113,11 +119,11 @@ models:
     provider: openai
     model: gpt-6-luna
     groups: [budget, openai, smoke]
-    params: {reasoning_effort: medium}
+    params: {reasoning_effort: high}
     max_output_tokens: 25000
-    reasoning: "reasoning effort=medium (API default)"
+    reasoning: "reasoning effort=high (API default is medium)"
     pricing: {input: 0.10, output: 0.50, cached_input: 0.01}
-    estimate: {image_tokens: 360, reasoning_tokens: 1500}  # AA MMMU-Pro: 5,417 at max
+    estimate: {image_tokens: 360, reasoning_tokens: 2500}  # AA MMMU-Pro: 5,417 at max
 
   # ------------------------------------------------------------------ Google (Gemini API)
   # Image tokens: media_resolution=high -> 1,120 per image (Google's recommendation for
@@ -128,12 +134,12 @@ models:
     provider: google
     model: gemini-3.8-flash
     groups: [frontier, google]
-    params: {thinking_level: medium, media_resolution: high}
+    params: {thinking_level: high, media_resolution: high}
     max_output_tokens: 32000
-    reasoning: "thinking_level=medium (API default)"
+    reasoning: "thinking_level=high (API default is medium)"
     # Introductory price through 2026-12-31; rises to $1.50 / $7.50 on 2027-01-01.
     pricing: {input: 0.75, output: 3.75}
-    estimate: {image_tokens: 1120, reasoning_tokens: 2500}  # AA MMMU-Pro: 4,537 at high
+    estimate: {image_tokens: 1120, reasoning_tokens: 4500}  # AA MMMU-Pro: 4,537 at high
     notes: "Google's strongest vision model as of Sep 2026 (beats 3.1 Pro on MMMU-Pro)."
 
   - id: gemini-3-1-pro-preview
@@ -144,7 +150,7 @@ models:
     groups: [frontier, google]
     params: {thinking_level: high, media_resolution: high}
     max_output_tokens: 32000
-    reasoning: "thinking_level=high (API default)"
+    reasoning: "thinking_level=high (also the API default)"
     pricing: {input: 2.00, output: 12.00}
     estimate: {image_tokens: 1120, reasoning_tokens: 3000}
 
@@ -154,11 +160,11 @@ models:
     provider: google
     model: gemini-3.5-flash-lite
     groups: [budget, google, smoke]
-    params: {thinking_level: minimal, media_resolution: high}
+    params: {thinking_level: high, media_resolution: high}
     max_output_tokens: 32000
-    reasoning: "thinking_level=minimal (API default)"
+    reasoning: "thinking_level=high (API default is minimal)"
     pricing: {input: 0.30, output: 2.50}
-    estimate: {image_tokens: 1120, reasoning_tokens: 1000}  # AA MMMU-Pro: 2,274
+    estimate: {image_tokens: 1120, reasoning_tokens: 3000}  # AA MMMU-Pro: 2,274
 
   # ------------------------------------------------------------------ xAI (Responses API, api.x.ai)
   # Image tokens for Grok 4.x are undocumented; ~1,300-1,800 is the best available
@@ -171,7 +177,7 @@ models:
     groups: [frontier, xai]
     params: {reasoning_effort: high}
     max_output_tokens: 32000
-    reasoning: "reasoning always on, effort=high (API default)"
+    reasoning: "reasoning always on, effort=high (also the API default)"
     pricing: {input: 2.00, output: 6.00, cached_input: 0.50}
     estimate: {image_tokens: 1600, reasoning_tokens: 3000}
 
@@ -181,11 +187,11 @@ models:
     provider: xai
     model: grok-4.3
     groups: [budget, xai, smoke]
-    params: {reasoning_effort: low}
+    params: {reasoning_effort: high}
     max_output_tokens: 32000
-    reasoning: "reasoning effort=low (API default)"
+    reasoning: "reasoning effort=high (API default is low)"
     pricing: {input: 1.25, output: 2.50, cached_input: 0.20}
-    estimate: {image_tokens: 1600, reasoning_tokens: 800}
+    estimate: {image_tokens: 1600, reasoning_tokens: 3000}
 
   # ------------------------------------------------------------------ Open-weight models via OpenRouter
   # Providers are pinned to full-precision / first-party endpoints that support strict
@@ -200,10 +206,11 @@ models:
     params:
       extra_body:
         provider: {order: [moonshotai, together, fireworks], allow_fallbacks: false, require_parameters: true}
+        reasoning: {effort: high}
     max_output_tokens: 32000
-    reasoning: "reasoning on, effort=max (model default)"
+    reasoning: "reasoning effort=high (model default is max; supports max/high/low)"
     pricing: {input: 3.00, output: 15.00}
-    estimate: {image_tokens: 1000, reasoning_tokens: 5500}  # AA MMMU-Pro: 5,546 at max
+    estimate: {image_tokens: 1000, reasoning_tokens: 3000}  # AA MMMU-Pro: 5,546 at max
 
   - id: qwen3-8-flash
     display_name: Qwen3.8 Flash
@@ -214,8 +221,9 @@ models:
     params:
       extra_body:
         provider: {require_parameters: true}
+        reasoning: {enabled: true}
     max_output_tokens: 32000
-    reasoning: "thinking on (model default)"
+    reasoning: "reasoning explicitly enabled (no effort levels; also the default)"
     pricing: {input: 0.15, output: 0.47}
     estimate: {image_tokens: 300, reasoning_tokens: 3000}
 
@@ -228,8 +236,9 @@ models:
     params:
       extra_body:
         provider: {order: [deepinfra], allow_fallbacks: false, require_parameters: true}
+        reasoning: {enabled: true}
     max_output_tokens: 32000
-    reasoning: "thinking on (model default)"
+    reasoning: "reasoning explicitly enabled (no effort levels; also the default)"
     pricing: {input: 0.06, output: 0.18}
     estimate: {image_tokens: 300, reasoning_tokens: 3000}
 
@@ -242,8 +251,9 @@ models:
     params:
       extra_body:
         provider: {order: [together], allow_fallbacks: false, require_parameters: true}
+        reasoning: {enabled: true}
     max_output_tokens: 32000
-    reasoning: "reasoning on (model default)"
+    reasoning: "reasoning explicitly enabled (no effort levels; default not documented)"
     pricing: {input: 0.30, output: 1.20}
     estimate: {image_tokens: 500, reasoning_tokens: 5900}  # AA MMMU-Pro: 5,875
 
