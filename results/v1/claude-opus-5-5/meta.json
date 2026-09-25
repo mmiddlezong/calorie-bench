@@ -2,7 +2,7 @@
   "model_id": "claude-opus-5-5",
   "prompt_version": "v1",
   "prompt_hash": "cb252f13b2dfbd12",
-  "manifest_hash": "73c74f45f3af6c45",
+  "manifest_hash": "ce212a4fe908974b",
   "request_config": {
     "provider": "anthropic",
     "model": "claude-opus-5-5",
@@ -21,7 +21,7 @@
     "cached_input": 0.2
   },
   "caloriebench_version": "0.1.0",
-  "git_commit": "a2e7dcc",
-  "updated_at": "2026-09-25T17:59:42+00:00",
-  "run_dishes_hash": "d99003d25520e8e6"
+  "git_commit": "d37e6a8-dirty",
+  "updated_at": "2026-09-25T18:54:28+00:00",
+  "run_dishes_hash": "3dab6d0a111b860d"
 }

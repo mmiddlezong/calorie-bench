@@ -2,7 +2,7 @@
   "model_id": "gpt-6-luna",
   "prompt_version": "v1",
   "prompt_hash": "cb252f13b2dfbd12",
-  "manifest_hash": "73c74f45f3af6c45",
+  "manifest_hash": "ce212a4fe908974b",
   "request_config": {
     "provider": "openai",
     "model": "gpt-6-luna",
@@ -21,7 +21,7 @@
     "cached_input": 0.01
   },
   "caloriebench_version": "0.1.0",
-  "git_commit": "d4315d7-dirty",
-  "updated_at": "2026-09-25T18:19:40+00:00",
-  "run_dishes_hash": "d99003d25520e8e6"
+  "git_commit": "d37e6a8-dirty",
+  "updated_at": "2026-09-25T19:12:56+00:00",
+  "run_dishes_hash": "3dab6d0a111b860d"
 }

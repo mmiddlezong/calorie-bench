@@ -73,7 +73,7 @@ def build_site(
                 "mae": _num(c["mae_kcal"], 2),
                 "mae_ci": [_num(v, 2) for v in c["mae_kcal_ci95"]],
                 "mae_pct": _num(c["mae_pct_of_mean"], 4),
-                "within20": _num(c["within_20pct"], 3),
+                "within20": int(f"{c['within_20pct'] * 100:.0f}") / 100,  # round like the README table
                 "within20_ci": [_num(v, 3) for v in c["within_20pct_ci95"]],
                 "mdape": _num(c["mdape"], 4),
                 "mape": _num(c["mape"], 4),

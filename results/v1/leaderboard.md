@@ -1,16 +1,16 @@
 # CalorieBench leaderboard (prompt v1)
 
-_Generated 2026-09-25 18:38 UTC. Ranked by mean absolute calorie error (lower is better). 95% CIs from 10,000 dish-level bootstrap resamples._
+_Generated 2026-09-25 19:13 UTC. Ranked by mean absolute calorie error (lower is better). 95% CIs from 10,000 dish-level bootstrap resamples._
 
 | # | Model | Calorie MAE, kcal (95% CI) | MAE % | Within ±20% | Median APE | MAPE | Bias (kcal) | r | Fail | Cost / 100 dishes | n |
 |---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | **Claude Fable 5.1** | 81 (63–103) | 30% | 38% | 26% | 33% | -36 | 0.77 | 0% | $1.84 | 100/100 |
-| 2 | **Claude Opus 5.5** | 93 (74–115) | 34% | 35% | 28% | 46% | +21 | 0.74 | 0% | $0.86 | 100/100 |
-| 3 | **Claude Sonnet 5** | 100 (81–121) | 36% | 34% | 36% | 47% | +25 | 0.74 | 0% | $0.38 | 100/100 |
-| 4 | **GPT-6 Luna** | 118 (98–141) | 43% | 27% | 37% | 56% | +53 | 0.73 | 0% | $0.05 | 100/100 |
-| 5 | **GPT-6 Sol** | 127 (107–150) | 46% | 27% | 39% | 67% | +80 | 0.75 | 0% | $0.94 | 100/100 |
-| 6 | **GPT-6 Astra** | 146 (122–171) | 53% | 22% | 51% | 73% | +119 | 0.79 | 0% | $5.63 | 100/100 |
-| 7 | **Claude Haiku 4.5** | 146 (122–172) | 53% | 24% | 43% | 82% | +60 | 0.59 | 0% | $0.93 | 100/100 |
+| 1 | **Claude Fable 5.1** | 82 (70–96) | 30% | 40% | 27% | 32% | -38 | 0.81 | 0% | $1.86 | 200/200 |
+| 2 | **Claude Opus 5.5** | 91 (79–105) | 33% | 34% | 29% | 44% | +23 | 0.78 | 0% | $0.88 | 200/200 |
+| 3 | **Claude Sonnet 5** | 101 (88–114) | 36% | 36% | 31% | 47% | +20 | 0.76 | 0% | $0.38 | 200/200 |
+| 4 | **GPT-6 Luna** | 112 (98–127) | 40% | 27% | 35% | 52% | +51 | 0.78 | 0% | $0.05 | 200/200 |
+| 5 | **GPT-6 Sol** | 127 (112–142) | 46% | 26% | 41% | 63% | +83 | 0.79 | 0% | $0.96 | 200/200 |
+| 6 | **Claude Haiku 4.5** | 139 (123–156) | 50% | 27% | 43% | 79% | +62 | 0.65 | 0% | $0.99 | 200/200 |
+| 7 | **GPT-6 Astra** | 145 (129–162) | 52% | 22% | 53% | 72% | +118 | 0.82 | 0% | $5.83 | 200/200 |
 
 **Columns.** *MAE*: mean absolute error of total calories vs. the ground truth (computed from weighed ingredients). *MAE %*: MAE as a share of the mean true calories (Nutrition5k paper metric). *Within ±20%*: share of dishes estimated within 20% of the true value (the FDA's tolerance for nutrition labels). *Median APE* / *MAPE*: median / mean absolute percentage error. *Bias*: mean signed error (negative = underestimates). *r*: Pearson correlation of predicted vs. true calories. *Fail*: unparseable answers, refusals, and truncations (scored as predicting 0). *Cost*: actual API spend per 100 dishes at list prices. ⚠ = incomplete run.
 
@@ -20,10 +20,10 @@ Mean absolute error, and in parentheses as a percentage of the mean true value (
 
 | Model | Mass (g) | Protein (g) | Carbs (g) | Fat (g) | Mean output tokens | Median latency |
 |---|---:|---:|---:|---:|---:|---:|
-| Claude Fable 5.1 | 51 (24%) | 6.8 (35%) | 5.1 (24%) | 5.8 (44%) | 128 | 4.7s |
-| Claude Opus 5.5 | 62 (30%) | 6.0 (31%) | 7.9 (37%) | 6.3 (48%) | 189 (33 reasoning) | 3.5s |
-| Claude Sonnet 5 | 62 (30%) | 7.4 (38%) | 7.4 (35%) | 7.1 (55%) | 140 | 2.6s |
-| GPT-6 Luna | 72 (34%) | 7.6 (39%) | 12.7 (61%) | 7.2 (56%) | 871 (774 reasoning) | 10.7s |
-| GPT-6 Sol | 83 (40%) | 8.1 (41%) | 11.7 (56%) | 8.3 (64%) | 804 (710 reasoning) | 18.9s |
-| GPT-6 Astra | 101 (48%) | 9.0 (46%) | 15.1 (72%) | 9.0 (69%) | 989 (890 reasoning) | 29.3s |
-| Claude Haiku 4.5 | 87 (41%) | 10.5 (53%) | 13.6 (65%) | 9.3 (72%) | 1637 (1512 reasoning) | 16.3s |
+| Claude Fable 5.1 | 53 (25%) | 7.0 (37%) | 5.9 (26%) | 5.8 (44%) | 133 | 4.8s |
+| Claude Opus 5.5 | 67 (31%) | 6.6 (35%) | 8.2 (36%) | 5.9 (45%) | 200 (38 reasoning) | 3.4s |
+| Claude Sonnet 5 | 67 (31%) | 7.8 (41%) | 8.1 (36%) | 6.9 (53%) | 145 | 2.6s |
+| GPT-6 Luna | 78 (36%) | 8.3 (44%) | 13.1 (57%) | 6.8 (52%) | 881 (782 reasoning) | 10.0s |
+| GPT-6 Sol | 95 (44%) | 8.7 (46%) | 12.0 (53%) | 7.8 (60%) | 819 (723 reasoning) | 19.2s |
+| Claude Haiku 4.5 | 94 (43%) | 10.5 (55%) | 14.6 (64%) | 8.6 (66%) | 1768 (1640 reasoning) | 16.9s |
+| GPT-6 Astra | 108 (50%) | 9.6 (51%) | 15.2 (67%) | 8.1 (62%) | 1029 (927 reasoning) | 30.9s |
