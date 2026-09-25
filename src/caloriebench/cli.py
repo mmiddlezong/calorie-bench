@@ -352,6 +352,15 @@ def worst(
 
 
 @app.command()
+def site() -> None:
+    """Build the results website data (site/data.js + thumbnails) from stored predictions."""
+    from .site import build_site
+
+    out = build_site(load_dishes(), load_registry())
+    console.print(f"[green]✓[/] wrote {out.relative_to(ROOT)} — open site/index.html in a browser")
+
+
+@app.command()
 def prompt() -> None:
     """Print the exact prompt sent with every image."""
     console.print(f"[bold]Prompt {PROMPT_VERSION}[/]\n")
