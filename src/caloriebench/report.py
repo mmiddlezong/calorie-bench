@@ -89,7 +89,8 @@ def leaderboard_markdown(scores: list[ModelScore], registry: Registry | None, re
 
     lines += [
         "",
-        "**Columns.** *MAE*: mean absolute error of total calories vs. the lab-measured value. "
+        "**Columns.** *MAE*: mean absolute error of total calories vs. the ground truth "
+        "(computed from weighed ingredients). "
         "*MAE %*: MAE as a share of the mean true calories (Nutrition5k paper metric). "
         "*Within ±20%*: share of dishes estimated within 20% of the true value (the FDA's "
         "tolerance for nutrition labels). *Median APE* / *MAPE*: median / mean absolute "

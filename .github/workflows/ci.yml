@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --locked
+      - name: Lint
+        run: |
+          uv run ruff check src tests scripts
+          uv run ruff format --check src tests scripts
+      - name: Test
+        run: uv run pytest -q
+      - name: Offline dry run of every configured model
+        run: |
+          uv run caloriebench download
+          uv run caloriebench run all --dry-run --limit 1 > /dev/null
+          uv run caloriebench estimate

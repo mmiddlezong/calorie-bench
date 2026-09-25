@@ -91,12 +91,31 @@ def _estimate_table(specs, n_requests: int) -> tuple[Table, float, float, float]
     return table, lo, ex, hi
 
 
+def _estimate_markdown(specs, n_requests: int) -> str:
+    lines = [
+        f"| Model | Lab | Price in / out ($/1M) | Tokens in / out per dish | Expected ({n_requests} dishes) | Range |",
+        "|---|---|---:|---:|---:|---:|",
+    ]
+    lo = ex = hi = 0.0
+    for spec in specs:
+        est = estimate_cost(spec, n_requests)
+        lo, ex, hi = lo + est.low_usd, ex + est.expected_usd, hi + est.high_usd
+        price = f"${spec.pricing.input:g} / ${spec.pricing.output:g}"
+        lines.append(
+            f"| {spec.display_name} | {spec.lab} | {price} | {est.input_tokens_per_req:,} / "
+            f"{est.output_tokens_per_req:,} | **${est.expected_usd:.2f}** | ${est.low_usd:.2f}–${est.high_usd:.2f} |"
+        )
+    lines.append(f"| **Total** | | | | **${ex:.2f}** | ${lo:.2f}–${hi:.2f} |")
+    return "\n".join(lines)
+
+
 @app.command()
 def estimate(
     model_names: ModelsArg = None,
     limit: LimitOpt = None,
     repeats: Annotated[int, typer.Option(help="Samples per dish.")] = 1,
     as_json: Annotated[bool, typer.Option("--json", help="Machine-readable output.")] = False,
+    markdown: Annotated[bool, typer.Option("--markdown", help="Print a Markdown table (for the README).")] = False,
 ) -> None:
     """Estimate API cost before running (no API calls are made)."""
     reg = load_registry()
@@ -105,6 +124,9 @@ def estimate(
     if as_json:
         out = [estimate_cost(s, n).__dict__ for s in specs]
         console.print_json(json.dumps(out))
+        return
+    if markdown:
+        print(_estimate_markdown(specs, n))
         return
     table, *_ = _estimate_table(specs, n)
     console.print(table)
