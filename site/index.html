@@ -31,8 +31,6 @@
   --crit: #d03b3b;
   --q-good: rgba(12, 163, 12, 0.07);
   --q-bad: rgba(208, 59, 59, 0.07);
-  --q-good-ink: #0a7a0a;
-  --q-bad-ink: #b83232;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
@@ -40,7 +38,7 @@
     --bg: #121212; --ink: #f2f2f2; --ink-2: #c8c8c8; --muted: #9a9a9a; --rule: #f2f2f2; --hair: #333333;
     --wash: #1d1d1d; --mark: #3987e5; --mark-2: #d95926; --link: #6da7ec; --band: rgba(57, 135, 229, 0.16);
     --under: #3987e5; --over: #e66767; --good: #0ca30c; --warn: #fab219; --crit: #e66767;
-    --q-good: rgba(12, 163, 12, 0.13); --q-bad: rgba(230, 103, 103, 0.12); --q-good-ink: #3fc43f; --q-bad-ink: #f08a8a;
+    --q-good: rgba(12, 163, 12, 0.13); --q-bad: rgba(230, 103, 103, 0.12);
   }
 }
 :root[data-theme="dark"] {
@@ -48,7 +46,7 @@
   --bg: #121212; --ink: #f2f2f2; --ink-2: #c8c8c8; --muted: #9a9a9a; --rule: #f2f2f2; --hair: #333333;
   --wash: #1d1d1d; --mark: #3987e5; --mark-2: #d95926; --link: #6da7ec; --band: rgba(57, 135, 229, 0.16);
   --under: #3987e5; --over: #e66767; --good: #0ca30c; --warn: #fab219; --crit: #e66767;
-    --q-good: rgba(12, 163, 12, 0.13); --q-bad: rgba(230, 103, 103, 0.12); --q-good-ink: #3fc43f; --q-bad-ink: #f08a8a;
+    --q-good: rgba(12, 163, 12, 0.13); --q-bad: rgba(230, 103, 103, 0.12);
 }
 
 * { box-sizing: border-box; }
@@ -121,7 +119,7 @@ table.lb th:nth-child(2), table.lb td:nth-child(2) { text-align: left; }
 .footnote { font-size: 14px; color: var(--ink-2); margin: 10px 0 0; max-width: 80ch; }
 
 /* charts */
-.charts { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px 56px; }
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 36px 56px; margin-top: 44px; }
 @media (max-width: 880px) { .charts { grid-template-columns: 1fr; } }
 .chart { position: relative; width: 100%; }
 .chart svg { display: block; width: 100%; overflow: visible; }
@@ -130,7 +128,6 @@ table.lb th:nth-child(2), table.lb td:nth-child(2) { text-align: left; }
 .axis-title { font-size: 12.5px; fill: var(--ink-2); font-weight: 600; }
 .pt-label { font-size: 12.5px; fill: var(--ink); font-weight: 700; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
 .pt-label.dim { fill: var(--ink-2); font-weight: 500; }
-.q-label { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 .ref-label { font-size: 11.5px; fill: var(--muted); font-weight: 600; }
 .stack > * + * { margin-top: 36px; }
 .key { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
@@ -262,20 +259,16 @@ footer { font-size: 13px; color: var(--muted); padding: 48px 0 64px; border-top:
 
   <section id="cost">
     <header><h2>Accuracy and cost</h2></header>
+    <div class="chart" id="chart-cost"></div>
+    <div class="key"><span><i style="background:var(--mark)"></i>Best for the price</span><span><i style="background:var(--muted)"></i>Beaten by a cheaper model</span></div>
     <div class="charts">
       <div>
-        <div class="chart" id="chart-cost"></div>
-        <div class="key"><span><i style="background:var(--mark)"></i>Best for the price</span><span><i style="background:var(--muted)"></i>Beaten by a cheaper model</span></div>
+        <h3>Over or under</h3>
+        <div class="chart" id="chart-bias"></div>
       </div>
-      <div class="stack">
-        <div>
-          <h3>Over or under</h3>
-          <div class="chart" id="chart-bias"></div>
-        </div>
-        <div>
-          <h3>Plates within 20%</h3>
-          <div class="chart" id="chart-w20"></div>
-        </div>
+      <div>
+        <h3>Plates within 20%</h3>
+        <div class="chart" id="chart-w20"></div>
       </div>
     </div>
   </section>
@@ -545,7 +538,7 @@ function renderCost() {
   const host = $("#chart-cost"); host.innerHTML = "";
   const pts = real.filter(m => m.cost_per_100 > 0);
   if (!pts.length) { host.innerHTML = '<div class="empty">No results yet.</div>'; return; }
-  const W = Math.max(320, host.clientWidth), H = Math.round(Math.min(480, Math.max(320, W * 0.72)));
+  const W = Math.max(320, host.clientWidth), H = Math.round(Math.min(520, Math.max(320, W * 0.5)));
   const M = {t: 14, r: 16, b: 46, l: 52};
   const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Average calorie error against cost for 100 plates"}, host);
   const costs = pts.map(m => m.cost_per_100), errs = pts.map(m => m.mae);
@@ -561,8 +554,6 @@ function renderCost() {
   const ym = Y((Math.min(...errs) + Math.max(...errs)) / 2);
   el("rect", {x: L, y: T, width: xm - L, height: ym - T, fill: "var(--q-good)"}, svg);
   el("rect", {x: xm, y: ym, width: R - xm, height: B - ym, fill: "var(--q-bad)"}, svg);
-  el("text", {x: xm - 8, y: T + 18, "text-anchor": "end", class: "q-label", fill: "var(--q-good-ink)"}, svg).textContent = "Efficient";
-  el("text", {x: xm + 8, y: B - 10, class: "q-label", fill: "var(--q-bad-ink)"}, svg).textContent = "Inefficient";
 
   for (const v of niceTicks(0, yMax, 5)) {
     el("line", {x1: L, x2: R, y1: Y(v), y2: Y(v), stroke: "var(--hair)", "stroke-opacity": .6}, svg);
@@ -572,7 +563,7 @@ function renderCost() {
     el("text", {x: X(v), y: B + 18, "text-anchor": "middle", class: "tick"}, svg).textContent = "$" + (v < 1 ? v : v.toFixed(0));
   el("line", {x1: L, x2: R, y1: B, y2: B, stroke: "var(--rule)", "stroke-width": 1.5}, svg);
   el("text", {x: (L + R) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "Cost for 100 plates (log scale)";
-  axisY(svg, M, H, "Average error (kcal), lower is better");
+  axisY(svg, M, H, "Average error (kcal)");
 
   // reference lines: most accurate model and cheapest model
   const occupied = [];
