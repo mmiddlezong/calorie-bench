@@ -73,6 +73,7 @@ a { color: var(--link); text-underline-offset: 2px; }
 }
 .theme:hover { color: var(--ink); background: var(--wash); }
 @media (max-width: 640px) { .bar nav a.opt { display: none; } }
+@media (max-width: 480px) { .bar nav a:not(:last-child) { display: none; } .bar .wrap { gap: 14px; } }
 
 /* intro */
 .intro { padding: 56px 0 8px; max-width: 760px; }
