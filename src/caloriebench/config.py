@@ -17,7 +17,6 @@ PROVIDER_DEFAULTS: dict[str, dict] = {
     "google": {"api_key_env": ["GEMINI_API_KEY", "GOOGLE_API_KEY"]},
     "xai": {"api_key_env": ["XAI_API_KEY"], "base_url": "https://api.x.ai/v1"},
     "openrouter": {"api_key_env": ["OPENROUTER_API_KEY"], "base_url": "https://openrouter.ai/api/v1"},
-    "baseline": {"api_key_env": []},
 }
 
 
@@ -59,10 +58,6 @@ class ModelSpec(BaseModel):
     pricing_source: str = ""
     enabled: bool = True
 
-    @property
-    def is_baseline(self) -> bool:
-        return self.provider == "baseline"
-
     def key_envs(self) -> list[str]:
         if self.api_key_env is not None:
             return self.api_key_env
@@ -78,7 +73,7 @@ class ModelSpec(BaseModel):
         return None
 
     def has_credentials(self) -> bool:
-        return self.is_baseline or self.api_key() is not None
+        return self.api_key() is not None
 
 
 class Registry(BaseModel):
@@ -99,7 +94,7 @@ class Registry(BaseModel):
         return out
 
     def select(self, names: list[str] | None) -> list[ModelSpec]:
-        """Resolve model ids and/or group names. 'all' = every enabled non-baseline model."""
+        """Resolve model ids and/or group names. 'all' = every enabled model."""
         if not names:
             names = ["all"]
         chosen: list[ModelSpec] = []
@@ -110,7 +105,7 @@ class Registry(BaseModel):
                 if not part:
                     continue
                 if part == "all":
-                    ids = [m.id for m in self.models if m.enabled and not m.is_baseline]
+                    ids = [m.id for m in self.models if m.enabled]
                 elif part in groups:
                     ids = [i for i in groups[part] if self.get(i).enabled]
                 else:

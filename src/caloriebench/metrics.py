@@ -6,7 +6,7 @@ Mean absolute error of total calories (kcal), also shown as a percentage of the 
 value (the metric used in the Nutrition5k paper). MAE is symmetric and bounded for
 failures; MAPE is reported as a secondary metric only, because it caps under-estimates at
 100% but not over-estimates (a model answering "0 kcal" for everything would score
-MAPE = 100% and beat a guess-the-average baseline) and is dominated by tiny dishes.
+MAPE = 100%, better than most honest attempts) and is dominated by tiny dishes.
 
 Conventions
 -----------
@@ -14,7 +14,7 @@ Conventions
   samples first, then aggregated over dishes (so every dish carries equal weight).
 * A model failure (unparseable answer, refusal, or truncation) is scored as a prediction of
   0 for every target (absolute error = the full true value). This keeps denominators equal
-  across models and makes a failure cost more than a guess-the-average answer.
+  across models and makes a failure cost as much as missing the whole plate.
 * Infrastructure errors (status api_error) are NOT counted against the model; those dishes
   are simply missing, and `coverage` shows how complete the run is. Re-run to fill them.
 """

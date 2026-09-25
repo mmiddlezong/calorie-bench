@@ -12,9 +12,10 @@
 | 🥇 | **Claude Fable 5.1** <sub>Anthropic</sub> | **81 kcal** <sub>(63–103)</sub> | 38% | -36 | $1.84 |
 | 🥈 | **Claude Opus 5.5** <sub>Anthropic</sub> | **93 kcal** <sub>(74–115)</sub> | 35% | +21 | $0.86 |
 | 🥉 | **Claude Sonnet 5** <sub>Anthropic</sub> | **100 kcal** <sub>(81–121)</sub> | 34% | +25 | $0.38 |
-| 4 | **Claude Haiku 4.5** <sub>Anthropic</sub> | **146 kcal** <sub>(122–172)</sub> | 24% | +60 | $0.93 |
-| – | _Train-set median_ (baseline, ignores the photo) | 157 kcal | 19% | -36 | – |
-| – | _Train-set mean_ (baseline, ignores the photo) | 158 kcal | 24% | +7 | – |
+| 4 | **GPT-6 Luna** <sub>OpenAI</sub> | **118 kcal** <sub>(98–141)</sub> | 27% | +53 | $0.05 |
+| 5 | **GPT-6 Sol** <sub>OpenAI</sub> | **127 kcal** <sub>(107–150)</sub> | 27% | +80 | $0.94 |
+| 6 | **GPT-6 Astra** <sub>OpenAI</sub> | **146 kcal** <sub>(122–171)</sub> | 22% | +119 | $5.63 |
+| 7 | **Claude Haiku 4.5** <sub>Anthropic</sub> | **146 kcal** <sub>(122–172)</sub> | 24% | +60 | $0.93 |
 
 <sub>Mean absolute error of total calories on 100 real cafeteria plates (95% bootstrap CI). Within ±20%: share of plates inside the FDA's nutrition-label tolerance. Bias: mean signed error (negative = underestimates). Every model at high reasoning effort. Updated 2026-09-25; full table in [`results/v1/leaderboard.md`](results/v1/leaderboard.md).</sub>
 <!-- LEADERBOARD:END -->
@@ -67,7 +68,7 @@ as soon as it arrives. Re-running the same command retries only requests that hi
 network or API errors; completed dishes are never paid for twice.
 
 Model selectors accept ids or groups: `frontier`, `budget`, `smoke`, `anthropic`, `openai`,
-`google`, `xai`, `open-weights`, `baselines`, or `all`.
+`google`, `xai`, `open-weights`, or `all`.
 
 Other commands: `caloriebench compare A B` (paired significance test),
 `caloriebench worst MODEL` (error analysis), `caloriebench prompt` (the exact prompt).
@@ -221,24 +222,21 @@ Secondary metrics:
 
 Scoring rules:
 
-* **Failures count as predicting 0**, so the absolute error is the whole meal. A failure
-  therefore scores worse than a trivial guess-the-average answer.
+* **Failures count as predicting 0**, so the absolute error is the whole meal.
 * **Infrastructure errors do not count against the model.** Rate limits and outages are
   retried on re-run; until then the leaderboard marks the run incomplete (⚠).
 * **Why MAE rather than MAPE as the headline.** MAPE caps underestimates at 100% but not
-  overestimates. A model that answered "0 kcal" for everything would get MAPE = 100% and
-  beat a guess-the-average baseline (111%). MAPE is also dominated by the smallest dishes.
+  overestimates. A model that answered "0 kcal" for everything would get MAPE = 100%,
+  better than always guessing an average plate (111%). MAPE is also dominated by the
+  smallest dishes.
 * **Significance.** With 100 dishes, differences of 10–15 kcal are often noise.
   `caloriebench compare A B` runs a paired bootstrap test on the dishes both models
   answered.
 
-## Reference points
+## Specialized models for comparison
 
 | System | Evaluated on | Calorie MAE | MAE % |
 |---|---|---:|---:|
-| Always guess train-set median (baseline, this repo) | CalorieBench 100 | 157 kcal | 57% |
-| Always guess train-set mean (baseline, this repo) | CalorieBench 100 | 158 kcal | 58% |
-| Nutrition5k paper: guess the mean | full test split | 150.8 kcal | 60.2% |
 | Nutrition5k paper: CNN trained on Nutrition5k, RGB only | full test split | 70.6 kcal | 26.1% |
 | Nutrition5k paper: CNN, RGB + depth-derived volume | full test split | 41.3 kcal | 16.5% |
 
@@ -297,11 +295,10 @@ Run `uv run caloriebench run my-model-high --dry-run` to check the request befor
 configs/models.yaml          model registry: API ids, request settings, prices, estimates
 data/manifest.jsonl          the 100 dishes: labels, ingredients, image URL + checksum
 data/subset_info.json        how the subset was drawn
-data/baselines.json          train-split mean / median predictors
 scripts/build_subset.py      reproducible subset construction (maintainers only)
 src/caloriebench/
   prompt.py                  prompt v1 + JSON schema
-  providers/                 anthropic, openai (Responses; also xAI), openai_chat (OpenRouter), google, baseline
+  providers/                 anthropic, openai (Responses; also xAI), openai_chat (OpenRouter), google
   runner.py                  async, resumable, budget-capped runner
   parsing.py                 robust answer parsing
   metrics.py                 MAE/MAPE/within-X, bootstrap CIs, paired comparison

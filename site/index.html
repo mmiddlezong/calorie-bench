@@ -4,355 +4,340 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CalorieBench</title>
-<meta name="description" content="How well can frontier AI models count calories from a photo of a meal? A benchmark on 100 real cafeteria plates with weighed ground truth.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%232a78d6' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%232a78d6'/%3E%3C/svg%3E">
+<meta name="description" content="How well can AI models count calories from a photo of a meal? Results on 100 real cafeteria plates with weighed ground truth.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111'/%3E%3Crect x='6' y='8' width='20' height='3' fill='%23fff'/%3E%3Crect x='6' y='15' width='20' height='1.5' fill='%23fff'/%3E%3Crect x='6' y='21' width='14' height='1.5' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* Nutrition-Facts-label look: black ink, thick and thin rules, Franklin Gothic, tabular figures. */
 :root {
   color-scheme: light;
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
-  --surface-2: #f2f1ed;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --muted: #898781;
-  --grid: #e1e0d9;
-  --axis: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.10);
-  --s1: #2a78d6;
-  --s2: #eb6834;
-  --band: rgba(42, 120, 214, 0.09);
+  --bg: #ffffff;
+  --ink: #111111;
+  --ink-2: #444444;
+  --muted: #6b6b6b;
+  --rule: #111111;
+  --hair: #d9d9d9;
+  --wash: #f4f4f4;
+  --mark: #2a78d6;
+  --mark-2: #eb6834;
+  --link: #1c5cab;
+  --band: rgba(42, 120, 214, 0.10);
   --under: #2a78d6;
   --over: #e34948;
-  --good: #006300;
-  --good-mark: #0ca30c;
-  --warn-mark: #c98500;
-  --crit-mark: #d03b3b;
-  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+  --good: #0ca30c;
+  --warn: #c98500;
+  --crit: #d03b3b;
+  --q-good: rgba(12, 163, 12, 0.07);
+  --q-bad: rgba(208, 59, 59, 0.07);
+  --q-good-ink: #0a7a0a;
+  --q-bad-ink: #b83232;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
-    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --ink: #ffffff; --ink-2: #c3c2b7;
-    --muted: #898781; --grid: #2c2c2a; --axis: #45453f; --border: rgba(255,255,255,0.10);
-    --s1: #3987e5; --s2: #d95926; --band: rgba(57, 135, 229, 0.14); --under: #3987e5; --over: #e66767;
-    --good: #0ca30c; --good-mark: #0ca30c; --warn-mark: #fab219; --crit-mark: #e66767;
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    --bg: #121212; --ink: #f2f2f2; --ink-2: #c8c8c8; --muted: #9a9a9a; --rule: #f2f2f2; --hair: #333333;
+    --wash: #1d1d1d; --mark: #3987e5; --mark-2: #d95926; --link: #6da7ec; --band: rgba(57, 135, 229, 0.16);
+    --under: #3987e5; --over: #e66767; --good: #0ca30c; --warn: #fab219; --crit: #e66767;
+    --q-good: rgba(12, 163, 12, 0.13); --q-bad: rgba(230, 103, 103, 0.12); --q-good-ink: #3fc43f; --q-bad-ink: #f08a8a;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --ink: #ffffff; --ink-2: #c3c2b7;
-  --muted: #898781; --grid: #2c2c2a; --axis: #45453f; --border: rgba(255,255,255,0.10);
-  --s1: #3987e5; --s2: #d95926; --band: rgba(57, 135, 229, 0.14); --under: #3987e5; --over: #e66767;
-  --good: #0ca30c; --good-mark: #0ca30c; --warn-mark: #fab219; --crit-mark: #e66767;
-  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  --bg: #121212; --ink: #f2f2f2; --ink-2: #c8c8c8; --muted: #9a9a9a; --rule: #f2f2f2; --hair: #333333;
+  --wash: #1d1d1d; --mark: #3987e5; --mark-2: #d95926; --link: #6da7ec; --band: rgba(57, 135, 229, 0.16);
+  --under: #3987e5; --over: #e66767; --good: #0ca30c; --warn: #fab219; --crit: #e66767;
+    --q-good: rgba(12, 163, 12, 0.13); --q-bad: rgba(230, 103, 103, 0.12); --q-good-ink: #3fc43f; --q-bad-ink: #f08a8a;
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
 body {
-  margin: 0; background: var(--page); color: var(--ink);
-  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.55 "Libre Franklin", "Franklin Gothic Medium", "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
-a { color: var(--s1); text-decoration: none; }
-a:hover { text-decoration: underline; }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+a { color: var(--link); text-underline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+.num { font-variant-numeric: tabular-nums; }
 
-/* nav */
-nav.top {
-  position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--page) 85%, transparent);
-  backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--border);
+/* top bar */
+.bar { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--hair); }
+.bar .wrap { display: flex; align-items: center; gap: 22px; height: 52px; }
+.brand { font-weight: 900; font-size: 18px; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.bar nav { margin-left: auto; display: flex; gap: 20px; font-size: 14px; font-weight: 500; }
+.bar nav a { color: var(--ink-2); text-decoration: none; }
+.bar nav a:hover { color: var(--ink); text-decoration: underline; }
+.theme {
+  border: 0; background: none; color: var(--ink-2); cursor: pointer; padding: 6px; margin-right: -6px;
+  display: grid; place-items: center; border-radius: 6px;
 }
-nav.top .wrap { display: flex; align-items: center; gap: 20px; height: 56px; }
-.logo { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; color: var(--ink); letter-spacing: -0.01em; }
-.logo:hover { text-decoration: none; }
-.links { display: flex; gap: 18px; margin-left: auto; font-size: 14px; }
-.links a { color: var(--ink-2); }
-.links a:hover { color: var(--ink); text-decoration: none; }
-.icon-btn {
-  border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); border-radius: 8px;
-  width: 34px; height: 34px; display: grid; place-items: center; cursor: pointer;
+.theme:hover { color: var(--ink); background: var(--wash); }
+@media (max-width: 640px) { .bar nav a.opt { display: none; } }
+
+/* intro */
+.intro { padding: 56px 0 8px; max-width: 760px; }
+h1 { font-size: clamp(32px, 5vw, 44px); font-weight: 900; line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 18px; }
+.intro p { font-size: 18px; color: var(--ink-2); margin: 0 0 12px; max-width: 66ch; }
+.intro p.finding { color: var(--ink); }
+.intro strong { font-weight: 700; }
+
+/* sections: a thick rule on top, like the label's section bars */
+section { margin-top: 56px; border-top: 10px solid var(--rule); padding-top: 10px; }
+section > header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+h2 { font-size: 26px; font-weight: 900; letter-spacing: -0.01em; margin: 0; }
+h3 { font-size: 16px; font-weight: 800; margin: 0 0 8px; }
+.aside { font-size: 14px; color: var(--muted); }
+
+/* view switch: plain text buttons with an underline for the current one */
+.switch { display: flex; gap: 18px; font-size: 14px; font-weight: 600; }
+.switch button {
+  border: 0; background: none; padding: 2px 0; color: var(--muted); cursor: pointer; font: inherit;
+  border-bottom: 2px solid transparent;
 }
-.icon-btn:hover { color: var(--ink); }
-@media (max-width: 760px) { .links a.opt { display: none; } }
-@media (max-width: 480px) { .links a:not(.keep) { display: none; } .links { gap: 14px; } nav.top .wrap { gap: 12px; } }
+.switch button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 
-/* hero */
-header.hero { padding: 56px 0 28px; }
-.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--s1); }
-h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.08; letter-spacing: -0.025em; margin: 10px 0 14px; max-width: 16ch; }
-.lede { font-size: 17px; color: var(--ink-2); max-width: 62ch; margin: 0; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 32px; }
-.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
-.tile .k { font-size: 13px; color: var(--ink-2); }
-.tile .v { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; margin-top: 2px; line-height: 1.2; }
-.tile .s { font-size: 13px; color: var(--muted); margin-top: 2px; }
-
-/* sections */
-section { padding: 36px 0 8px; }
-h2 { font-size: 24px; letter-spacing: -0.015em; margin: 0 0 4px; }
-.sub { color: var(--ink-2); margin: 0 0 18px; max-width: 70ch; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
-.row2 { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
-@media (max-width: 900px) { .row2 { grid-template-columns: 1fr; } }
-.card h3 { font-size: 15px; margin: 0 0 2px; }
-.card .note { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
-
-/* tabs & controls */
-.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
-.seg { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; }
-.seg button {
-  border: 0; background: transparent; color: var(--ink-2); padding: 6px 12px; border-radius: 8px;
-  font: inherit; font-size: 14px; cursor: pointer;
-}
-.seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); font-weight: 600; }
-label.ctl { font-size: 13px; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
-select {
-  font: inherit; font-size: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 6px 28px 6px 10px; appearance: none; cursor: pointer;
-  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat;
-}
-
-/* leaderboard */
-.table-wrap { overflow-x: auto; margin: 0 -18px; padding: 0 18px; }
-table.lb { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 820px; }
+/* leaderboard table */
+.scroll { overflow-x: auto; }
+table.lb { width: 100%; border-collapse: collapse; min-width: 760px; }
 table.lb th {
-  text-align: right; font-size: 12px; font-weight: 600; color: var(--ink-2); padding: 8px 10px;
-  border-bottom: 1px solid var(--grid); white-space: nowrap; user-select: none;
+  font-size: 13px; font-weight: 700; text-align: right; padding: 6px 10px 8px; white-space: nowrap;
+  border-bottom: 5px solid var(--rule); user-select: none;
 }
-table.lb th.sortable { cursor: pointer; }
-table.lb th.sortable:hover { color: var(--ink); }
-table.lb th .arrow { color: var(--s1); margin-left: 3px; }
-table.lb td { text-align: right; padding: 11px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
-table.lb tr:last-child td { border-bottom: 0; }
-table.lb th:nth-child(1), table.lb td:nth-child(1) { text-align: center; width: 44px; }
+table.lb th[data-k] { cursor: pointer; }
+table.lb th[data-k]:hover { text-decoration: underline; }
+table.lb th .dir { font-weight: 900; margin-left: 3px; }
+table.lb td { text-align: right; padding: 12px 10px; border-bottom: 1px solid var(--hair); white-space: nowrap; font-variant-numeric: tabular-nums; }
+table.lb tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+table.lb th:nth-child(1), table.lb td:nth-child(1) { text-align: left; width: 36px; padding-left: 0; }
 table.lb th:nth-child(2), table.lb td:nth-child(2) { text-align: left; }
-table.lb tbody tr:hover td { background: var(--surface-2); }
-.rank { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-weight: 650; font-size: 13px; background: var(--surface-2); }
-.rank.r1 { background: var(--s1); color: #fff; }
-.mname { font-weight: 600; }
-.msub { font-size: 12px; color: var(--muted); }
-tr.baseline td { color: var(--ink-2); }
-tr.baseline .mname { font-weight: 500; font-style: italic; }
-.tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); margin-left: 6px; vertical-align: 1px; }
-.tag.live { color: var(--warn-mark); }
-.ci-cell { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
-.ci-cell .num { min-width: 34px; font-weight: 650; }
-.ci-cell .rng { font-size: 12px; color: var(--muted); min-width: 64px; text-align: left; }
-.foot { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; }
+.rk { font-weight: 800; }
+.mn { font-weight: 700; }
+.lab { color: var(--muted); font-size: 13px; margin-left: 6px; }
+.big { font-weight: 800; font-size: 17px; }
+.ci { display: inline-flex; align-items: center; gap: 10px; }
+.ci .r { color: var(--muted); font-size: 13px; min-width: 58px; text-align: left; }
+.footnote { font-size: 14px; color: var(--ink-2); margin: 10px 0 0; max-width: 80ch; }
 
 /* charts */
+.charts { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px 56px; }
+@media (max-width: 880px) { .charts { grid-template-columns: 1fr; } }
 .chart { position: relative; width: 100%; }
 .chart svg { display: block; width: 100%; overflow: visible; }
 .chart text { font-family: inherit; }
-.tick { font-size: 11.5px; fill: var(--muted); font-variant-numeric: tabular-nums; }
-.axis-title { font-size: 12px; fill: var(--ink-2); font-weight: 600; }
-.pt-label { font-size: 12px; fill: var(--ink); font-weight: 600; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.tick { font-size: 12px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.axis-title { font-size: 12.5px; fill: var(--ink-2); font-weight: 600; }
+.pt-label { font-size: 12.5px; fill: var(--ink); font-weight: 700; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
 .pt-label.dim { fill: var(--ink-2); font-weight: 500; }
-.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-top: 6px; }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
-.empty { padding: 40px 0; text-align: center; color: var(--muted); }
+.q-label { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.ref-label { font-size: 11.5px; fill: var(--muted); font-weight: 600; }
+.stack > * + * { margin-top: 36px; }
+.key { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+.key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; font-size: 14px; color: var(--ink-2); }
+select {
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: transparent;
+  border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; padding: 2px 22px 2px 0; appearance: none; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: calc(100% - 9px) 55%, calc(100% - 4px) 55%; background-size: 5px 5px; background-repeat: no-repeat;
+}
+select option { color: #111; }
+.empty { padding: 40px 0; color: var(--muted); }
 
 .tip {
-  position: fixed; z-index: 50; pointer-events: none; background: var(--surface); color: var(--ink);
-  border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 10px 12px;
-  font-size: 13px; line-height: 1.45; max-width: 280px; opacity: 0; transform: translateY(4px);
-  transition: opacity .12s, transform .12s;
+  position: fixed; z-index: 50; pointer-events: none; background: var(--bg); color: var(--ink);
+  border: 2px solid var(--rule); padding: 10px 12px; font-size: 13px; line-height: 1.45; max-width: 270px;
+  opacity: 0; transition: opacity .1s;
 }
-.tip.on { opacity: 1; transform: none; }
-.tip b { font-weight: 650; }
-.tip .muted { color: var(--muted); }
-.tip img { display: block; width: 100%; border-radius: 6px; margin-bottom: 8px; }
-.tip table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tip.on { opacity: 1; }
+.tip b { font-weight: 800; }
+.tip .m { color: var(--muted); }
+.tip img { display: block; width: 100%; margin-bottom: 8px; }
+.tip table { border-collapse: collapse; font-variant-numeric: tabular-nums; width: 100%; }
 .tip td { padding: 1px 0; }
 .tip td + td { padding-left: 14px; text-align: right; }
 
-/* error badges */
-.err { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.err .ic { font-size: 11px; }
-.err.good .ic { color: var(--good-mark); }
-.err.warn .ic { color: var(--warn-mark); }
-.err.crit .ic { color: var(--crit-mark); }
-.err.fail { color: var(--crit-mark); }
+/* error marks: shape + sign carry the meaning, color supports it */
+.err { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.err .ic { font-size: 10px; margin-right: 4px; vertical-align: 1px; }
+.err.good .ic { color: var(--good); }
+.err.warn .ic { color: var(--warn); }
+.err.crit .ic { color: var(--crit); }
+.err.fail { color: var(--crit); }
 
-/* dish grid */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; }
-.dish {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer;
-  text-align: left; padding: 0; font: inherit; color: inherit; transition: transform .12s, box-shadow .12s;
+/* plate gallery */
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 28px 18px; margin-top: 18px; }
+.plate { border: 0; padding: 0; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.plate img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--wash); }
+.plate:hover img { filter: brightness(1.06); }
+.plate:focus-visible { outline: 2px solid var(--mark); outline-offset: 4px; }
+.plate .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; border-top: 3px solid var(--rule); margin-top: 8px; padding-top: 6px; font-variant-numeric: tabular-nums; }
+.plate .t { font-weight: 800; font-size: 17px; }
+.plate .g { font-size: 13px; color: var(--ink-2); margin-top: 1px; }
+.more {
+  display: block; margin: 28px auto 0; font: inherit; font-weight: 700; font-size: 14px; color: var(--ink);
+  background: none; border: 2px solid var(--rule); padding: 9px 18px; cursor: pointer;
 }
-.dish:hover, .dish:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow); outline: none; }
-.dish:focus-visible { box-shadow: 0 0 0 2px var(--s1); }
-.dish .ph { aspect-ratio: 4 / 3; background: var(--surface-2); position: relative; }
-.dish img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.dish .truth {
-  position: absolute; left: 8px; top: 8px; background: rgba(0,0,0,.72); color: #fff; font-size: 12px; font-weight: 650;
-  padding: 2px 8px; border-radius: 999px;
-}
-.dish .meta { padding: 9px 11px 11px; display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 13px; }
-.dish .meta .pred { color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.more { display: block; margin: 16px auto 0; }
-.btn {
-  font: inherit; font-size: 14px; border: 1px solid var(--border); background: var(--surface); color: var(--ink);
-  padding: 8px 16px; border-radius: 10px; cursor: pointer;
-}
-.btn:hover { background: var(--surface-2); }
+.more:hover { background: var(--ink); color: var(--bg); }
 
 /* modal */
 .modal { position: fixed; inset: 0; z-index: 40; display: none; }
 .modal.on { display: block; }
-.modal .bg { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+.modal .shade { position: absolute; inset: 0; background: rgba(0,0,0,.6); }
 .modal .panel {
-  position: relative; margin: 4vh auto; width: min(1040px, calc(100% - 24px)); max-height: 92vh; overflow: auto;
-  background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 20px;
+  position: relative; margin: 4vh auto; width: min(1000px, calc(100% - 24px)); max-height: 92vh; overflow: auto;
+  background: var(--bg); padding: 24px;
 }
-.modal .close { position: absolute; right: 14px; top: 14px; }
-.mgrid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; }
-@media (max-width: 820px) { .mgrid { grid-template-columns: 1fr; } }
-.mimg { width: 100%; border-radius: 12px; display: block; background: var(--surface-2); aspect-ratio: 4 / 3; object-fit: cover; }
-.facts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 12px 0; }
-.fact { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; }
-.fact .k { font-size: 11.5px; color: var(--ink-2); }
-.fact .v { font-weight: 650; font-size: 16px; }
-.ingr { font-size: 13px; color: var(--ink-2); columns: 2; column-gap: 18px; margin: 0; padding-left: 18px; }
-.ptable { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
-.ptable th { text-align: left; font-size: 12px; color: var(--ink-2); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--grid); }
-.ptable td { padding: 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-.ptable td.n { text-align: right; }
-.ptable details summary { cursor: pointer; color: var(--ink-2); font-size: 12.5px; }
-.ptable details ul { margin: 6px 0 0; padding-left: 16px; color: var(--ink-2); font-size: 12.5px; }
+.modal .x {
+  position: absolute; right: 12px; top: 10px; border: 0; background: none; font: inherit; font-size: 22px;
+  line-height: 1; color: var(--ink); cursor: pointer; padding: 6px;
+}
+.mgrid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; }
+@media (max-width: 800px) { .mgrid { grid-template-columns: 1fr; } }
+.mimg { width: 100%; display: block; aspect-ratio: 4 / 3; object-fit: cover; background: var(--wash); }
+.src { font-size: 13px; color: var(--muted); margin-top: 8px; }
+/* the mini Nutrition Facts panel */
+.facts { border: 2px solid var(--rule); padding: 6px 10px 8px; max-width: 360px; }
+.facts .title { font-size: 30px; font-weight: 900; line-height: 1.05; border-bottom: 1px solid var(--rule); padding-bottom: 4px; margin: 0; }
+.facts .row { display: flex; justify-content: space-between; border-top: 1px solid var(--rule); padding: 3px 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+.facts .row.kcal { border-top: 10px solid var(--rule); font-size: 22px; font-weight: 900; padding-top: 2px; }
+.facts .row.kcal + .row { border-top-width: 5px; }
+.facts .row b { font-weight: 800; }
+.ingr { font-size: 14px; color: var(--ink-2); margin: 14px 0 0; }
+.ingr h3 { color: var(--ink); }
+.ingr ul { columns: 2; column-gap: 20px; padding-left: 18px; margin: 0; }
+.ptable { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; margin-top: 8px; }
+.ptable th { text-align: left; font-size: 13px; font-weight: 700; padding: 6px 8px 6px 0; border-bottom: 5px solid var(--rule); }
+.ptable td { padding: 9px 8px 9px 0; border-bottom: 1px solid var(--hair); vertical-align: top; }
+.ptable .n { text-align: right; }
+.ptable details summary { cursor: pointer; color: var(--ink-2); }
+.ptable details ul { margin: 6px 0 0; padding-left: 16px; color: var(--ink-2); font-size: 13px; }
 
-/* method */
-.method { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-.method .card { box-shadow: none; }
-.method p { font-size: 14px; color: var(--ink-2); margin: 6px 0 0; }
-footer { color: var(--muted); font-size: 13px; padding: 40px 0 56px; }
-footer code { font-size: 12px; }
+/* method: plain prose in two columns */
+.method { columns: 2; column-gap: 48px; max-width: 980px; }
+@media (max-width: 760px) { .method { columns: 1; } }
+.method p { margin: 0 0 14px; color: var(--ink-2); break-inside: avoid; }
+.method p b { color: var(--ink); }
+footer { font-size: 13px; color: var(--muted); padding: 48px 0 64px; border-top: 1px solid var(--hair); margin-top: 56px; }
 </style>
 </head>
 <body>
-<nav class="top">
+<div class="bar">
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="CalorieBench home">
-      <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="var(--s1)" stroke-width="3"/><circle cx="16" cy="16" r="6" fill="var(--s1)"/></svg>
-      CalorieBench
-    </a>
-    <div class="links">
-      <a class="keep" href="#leaderboard">Leaderboard</a>
+    <a class="brand" href="#top">CalorieBench</a>
+    <nav aria-label="Sections">
+      <a href="#leaderboard">Leaderboard</a>
       <a class="opt" href="#cost">Cost</a>
-      <a class="opt" href="#predictions">Predictions</a>
-      <a href="#dishes">Dishes</a>
+      <a class="opt" href="#guesses">Guesses</a>
+      <a href="#plates">Plates</a>
       <a class="opt" href="#method">Method</a>
-      <a class="keep" href="https://github.com/mmiddlezong/calorie-bench">GitHub</a>
-    </div>
-    <button class="icon-btn" id="theme" title="Toggle light/dark" aria-label="Toggle light or dark theme">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <a href="https://github.com/mmiddlezong/calorie-bench">GitHub</a>
+    </nav>
+    <button class="theme" id="theme" aria-label="Switch between light and dark">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     </button>
   </div>
-</nav>
+</div>
 
 <main class="wrap" id="top">
-  <header class="hero">
-    <div class="eyebrow">AI benchmark · nutrition from photos</div>
+  <div class="intro">
     <h1>How well can AI count calories from a photo?</h1>
-    <p class="lede">Models see one overhead photo of a real cafeteria plate and estimate its calories, weight and macros.
-      Every answer is checked against ground truth from the <a href="https://github.com/google-research-datasets/Nutrition5k">Nutrition5k</a> dataset,
-      where each ingredient was weighed as the plate was built.</p>
-    <div class="tiles" id="tiles"></div>
-  </header>
+    <p>We showed AI models 100 photos of real cafeteria plates and asked how many calories were on each one.
+      The right answers come from <a href="https://github.com/google-research-datasets/Nutrition5k">Nutrition5k</a>,
+      where every ingredient was weighed as the plate was put together.</p>
+    <p class="finding" id="finding"></p>
+  </div>
 
   <section id="leaderboard">
-    <h2>Leaderboard</h2>
-    <p class="sub">Ranked by mean absolute calorie error across 100 dishes. The bar shows the 95% confidence interval; overlapping bars mean the gap may be noise.</p>
-    <div class="card">
-      <div class="controls">
-        <div class="seg" role="tablist" id="lb-tabs">
-          <button role="tab" aria-selected="true" data-tab="cal">Calories</button>
-          <button role="tab" aria-selected="false" data-tab="mac">Macros &amp; weight</button>
-        </div>
+    <header>
+      <h2>Leaderboard</h2>
+      <div class="switch" role="group" aria-label="Table view">
+        <button aria-pressed="true" data-view="cal">Calories</button>
+        <button aria-pressed="false" data-view="mac">Macros and weight</button>
       </div>
-      <div class="table-wrap"><table class="lb" id="lb"></table></div>
-      <p class="foot" id="lb-foot"></p>
-    </div>
+    </header>
+    <div class="scroll"><table class="lb" id="lb"></table></div>
   </section>
 
   <section id="cost">
-    <h2>Accuracy vs. cost</h2>
-    <p class="sub">Each model's calorie error against what it costs to run all 100 dishes. Blue points are on the Pareto frontier: no other model is both cheaper and more accurate.</p>
-    <div class="row2">
-      <div class="card">
-        <h3>Error vs. cost per 100 dishes</h3>
-        <p class="note">Log scale on cost. Up is better.</p>
+    <header><h2>Accuracy and cost</h2></header>
+    <div class="charts">
+      <div>
         <div class="chart" id="chart-cost"></div>
-        <div class="legend"><span><i style="background:var(--s1)"></i>Pareto frontier</span><span><i style="background:var(--muted)"></i>Other models</span></div>
+        <div class="key"><span><i style="background:var(--mark)"></i>Best for the price</span><span><i style="background:var(--muted)"></i>Beaten by a cheaper model</span></div>
       </div>
-      <div class="card">
-        <h3>Over- or under-estimating?</h3>
-        <p class="note">Mean signed error per dish, in kcal.</p>
-        <div class="chart" id="chart-bias"></div>
-        <div class="legend"><span><i style="background:var(--under)"></i>Underestimates</span><span><i style="background:var(--over)"></i>Overestimates</span></div>
-        <h3 style="margin-top:22px">Plates within ±20%</h3>
-        <p class="note">Share of the 100 plates within the FDA's nutrition-label tolerance.</p>
-        <div class="chart" id="chart-w20"></div>
+      <div class="stack">
+        <div>
+          <h3>Over or under</h3>
+          <div class="chart" id="chart-bias"></div>
+        </div>
+        <div>
+          <h3>Plates within 20%</h3>
+          <div class="chart" id="chart-w20"></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="predictions">
-    <h2>Predicted vs. true calories</h2>
-    <p class="sub">One point per dish. Points inside the shaded wedge are within ±20% of the truth. Hover to see the plate; click to open it.</p>
-    <div class="card">
+  <section id="guesses">
+    <header>
+      <h2>Estimates vs. truth</h2>
       <div class="controls">
-        <label class="ctl">Model <select id="pv-a"></select></label>
-        <label class="ctl">Compare with <select id="pv-b"></select></label>
+        <label>Model <select id="pv-a"></select></label>
+        <label>Compare <select id="pv-b"></select></label>
       </div>
-      <div class="chart" id="chart-pv"></div>
-      <div class="legend" id="pv-legend"></div>
-    </div>
+    </header>
+    <div class="chart" id="chart-pv"></div>
+    <div class="key" id="pv-key"></div>
   </section>
 
-  <section id="dishes">
-    <h2>Dish explorer</h2>
-    <p class="sub">All 100 plates. Click one to see every model's itemized guess next to the weighed ingredient list.</p>
-    <div class="controls">
-      <label class="ctl">Show predictions from <select id="dx-model"></select></label>
-      <label class="ctl">Sort <select id="dx-sort">
-        <option value="hard">Hardest first (all models)</option>
-        <option value="err">Biggest error (this model)</option>
-        <option value="disagree">Most model disagreement</option>
-        <option value="kcal-desc">Most calories</option>
-        <option value="kcal-asc">Fewest calories</option>
-        <option value="index">Dataset order</option>
-      </select></label>
-    </div>
-    <div class="grid" id="grid"></div>
-    <button class="btn more" id="more">Show all 100 dishes</button>
+  <section id="plates">
+    <header>
+      <h2>The 100 plates</h2>
+      <div class="controls">
+        <label>Estimates from <select id="dx-model"></select></label>
+        <label>Order <select id="dx-sort">
+          <option value="hard">Hardest for all models</option>
+          <option value="err">Worst for this model</option>
+          <option value="disagree">Models disagree most</option>
+          <option value="kcal-desc">Most calories</option>
+          <option value="kcal-asc">Fewest calories</option>
+          <option value="index">Benchmark order</option>
+        </select></label>
+      </div>
+    </header>
+    <div class="gallery" id="gallery"></div>
+    <button class="more" id="more">Show all 100 plates</button>
   </section>
 
   <section id="method">
-    <h2>Method</h2>
-    <p class="sub">Full details, code and raw predictions are on <a href="https://github.com/mmiddlezong/calorie-bench">GitHub</a>.</p>
+    <header><h2>Method</h2></header>
     <div class="method">
-      <div class="card"><h3>Dataset</h3><p>100 plates from the official Nutrition5k test split, stratified by calorie decile (31–902 kcal). Labels are computed from weighed ingredients. Plates with inconsistent labels or food out of frame were excluded.</p></div>
-      <div class="card"><h3>Task</h3><p>One overhead PNG photo and one fixed prompt. The model lists each food with estimated grams and calories, then gives plate totals as JSON. Every model runs at high reasoning effort.</p></div>
-      <div class="card"><h3>Scoring</h3><p>Headline: mean absolute calorie error, with bootstrap 95% CIs. A failed or refused answer counts as predicting 0 kcal. API errors are retried, never scored.</p></div>
-      <div class="card"><h3>Caveats</h3><p>100 dishes is small: check confidence intervals before claiming a winner. One cuisine, one camera angle, no scale reference. Ground truth uses database nutrition values, not lab assays.</p></div>
+      <p><b>The plates.</b> 100 dishes from the official Nutrition5k test set, 10 from each tenth of the calorie range (31 to 902 kcal).
+        Plates whose labels didn't add up, or where food was out of frame, were left out.</p>
+      <p><b>The question.</b> Each model gets one overhead photo and the same prompt: list the foods with their weights and calories, then give totals for the plate.
+        Every model runs at its high reasoning setting.</p>
+      <p><b>Scoring.</b> The main number is the average gap between a model's calorie estimate and the weighed truth.
+        The ranges are 95% confidence intervals, so models whose ranges overlap may not really differ.
+        An answer that fails or is refused counts as a guess of zero.</p>
+      <p><b>Limits.</b> 100 plates is a small sample, all from one set of cafeterias and one camera angle, with nothing in the photo for scale.
+        The truth comes from weighed ingredients and nutrition databases, not lab tests.
+        Code, prompt and every raw answer are on <a href="https://github.com/mmiddlezong/calorie-bench">GitHub</a>.</p>
     </div>
   </section>
 
   <footer>
     <div id="updated"></div>
-    <div>Dish photos and labels: Nutrition5k (Thames et al., CVPR 2021), © Google, CC BY 4.0. Code: MIT.</div>
+    <div>Photos and labels from Nutrition5k (Thames et al., CVPR 2021), © Google, CC BY 4.0.</div>
   </footer>
 </main>
 
 <div class="tip" id="tip" role="tooltip"></div>
 <div class="modal" id="modal" aria-hidden="true">
-  <div class="bg" data-close></div>
+  <div class="shade" data-close></div>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="m-title">
-    <button class="icon-btn close" data-close aria-label="Close">✕</button>
+    <button class="x" data-close aria-label="Close">×</button>
     <div id="m-body"></div>
   </div>
 </div>
@@ -377,34 +362,30 @@ $("#theme").addEventListener("click", () => {
 });
 
 if (!D || !D.models || !D.models.length) {
-  $("#tiles").innerHTML = '<div class="tile"><div class="k">No results yet</div><div class="v">Run <code>caloriebench site</code></div></div>';
+  $("#finding").textContent = "No results have been published yet.";
   return;
 }
 
 // ---------- data
 const models = D.models;
-const real = models.filter(m => !m.baseline).sort((a, b) => a.mae - b.mae);
-const baselines = models.filter(m => m.baseline).sort((a, b) => a.mae - b.mae);
-const base = baselines[0];
+const real = [...models].sort((a, b) => a.mae - b.mae);
 const byId = Object.fromEntries(models.map(m => [m.id, m]));
 const rank = Object.fromEntries(real.map((m, i) => [m.id, i + 1]));
 const dishes = D.dishes;
 const dishById = Object.fromEntries(dishes.map(d => [d.id, d]));
 
 const f0 = v => v == null ? "–" : Math.round(v).toLocaleString();
-const pct = (v, d = 0) => v == null ? "–" : (v * 100).toFixed(d) + "%";
+const pct = v => v == null ? "–" : Math.round(v * 100) + "%";
 const usd = v => v == null ? "–" : "$" + (v < 0.1 ? v.toFixed(3) : v.toFixed(2));
-const signed = v => v == null ? "–" : (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(Math.round(v));
+const signed = v => v == null ? "–" : (Math.round(v) > 0 ? "+" : Math.round(v) < 0 ? "−" : "") + Math.abs(Math.round(v));
 
-function errBadge(pred, truth) {
-  if (pred == null) return '<span class="err fail"><span class="ic">✕</span>failed</span>';
+function errMark(pred, truth) {
+  if (pred == null) return '<span class="err fail">failed</span>';
   const e = (pred - truth) / truth, a = Math.abs(e);
-  const cls = a <= 0.2 ? "good" : a <= 0.5 ? "warn" : "crit";
-  const ic = cls === "good" ? "●" : cls === "warn" ? "▲" : "■";
-  return `<span class="err ${cls}" title="${cls === "good" ? "within ±20%" : cls === "warn" ? "20–50% off" : "more than 50% off"}"><span class="ic">${ic}</span>${e >= 0 ? "+" : "−"}${Math.round(a * 100)}%</span>`;
+  const [cls, ic, title] = a <= 0.2 ? ["good", "●", "within 20%"] : a <= 0.5 ? ["warn", "▲", "20–50% off"] : ["crit", "■", "more than 50% off"];
+  return `<span class="err ${cls}" title="${title}"><span class="ic">${ic}</span>${e >= 0 ? "+" : "−"}${Math.round(a * 100)}%</span>`;
 }
 
-// per-dish difficulty across models
 for (const d of dishes) {
   const vals = real.map(m => d.preds[m.id]).filter(Boolean).map(p => p.kcal ?? 0);
   const apes = vals.map(v => Math.abs(v - d.kcal) / d.kcal);
@@ -413,45 +394,43 @@ for (const d of dishes) {
   d.disagree = vals.length > 1 && mean > 0 ? Math.sqrt(vals.reduce((a, v) => a + (v - mean) ** 2, 0) / vals.length) / mean : 0;
 }
 
-// ---------- hero tiles
-(function tiles() {
+// ---------- the finding, in a sentence
+(function finding() {
   const best = real[0];
+  if (!best) return;
+  let s = `The most accurate so far is <strong>${esc(best.name)}</strong>, which is off by <strong>${f0(best.mae)} calories</strong> per plate on average,
+    about ${pct(best.mae_pct)} of a typical ${f0(D.mean_kcal)}-calorie plate.`;
+  const worst = real[real.length - 1];
+  if (real.length > 1) s += ` The least accurate, ${esc(worst.name)}, is off by ${f0(worst.mae)}.`;
+  $("#finding").innerHTML = s;
   const spend = real.reduce((a, m) => a + (m.total_cost || 0), 0);
-  const t = [];
-  if (best) {
-    t.push(["Top model", best.name, `#1 of ${real.length} · 95% CI ${f0(best.mae_ci[0])}–${f0(best.mae_ci[1])} kcal`]);
-    t.push(["Best average error", `${f0(best.mae)} kcal`, `${pct(best.mae_pct)} of a typical plate (${f0(D.mean_kcal)} kcal)`]);
-    t.push(["Best within ±20%", pct(real.reduce((a, m) => Math.max(a, m.within20 || 0), 0)), "share of plates the FDA label tolerance would accept"]);
-  }
-  if (base) t.push(["Guess-the-average baseline", `${f0(base.mae)} kcal`, "error from ignoring the photo entirely"]);
-  t.push(["Benchmark", `${real.length} model${real.length === 1 ? "" : "s"} · ${D.n_dishes} plates`, `${usd(spend)} total API spend so far`]);
-  $("#tiles").innerHTML = t.map(([k, v, s]) => `<div class="tile"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`).join("");
-  $("#updated").textContent = `Updated ${new Date(D.generated_at).toLocaleString()} · prompt ${D.prompt_version}`;
+  $("#updated").textContent = `${real.length} models, ${D.n_dishes} plates, $${spend.toFixed(2)} of API calls. Updated ${new Date(D.generated_at).toLocaleDateString(undefined, {year: "numeric", month: "long", day: "numeric"})}.`;
 })();
 
 // ---------- leaderboard
-let lbTab = "cal", sortKey = "mae", sortDir = 1;
+let view = "cal", sortKey = "mae", sortDir = 1;
 const ciMax = Math.max(...models.map(m => (m.mae_ci && m.mae_ci[1]) || m.mae)) * 1.05;
 
 function ciBar(m) {
   const W = 120, H = 16, x = v => (v / ciMax) * W;
   const lo = m.mae_ci?.[0] ?? m.mae, hi = m.mae_ci?.[1] ?? m.mae;
-  const color = m.baseline ? "var(--muted)" : rank[m.id] === 1 ? "var(--s1)" : "var(--ink-2)";
+  const c = "var(--ink)";
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">
-    <line x1="0" x2="${W}" y1="${H / 2}" y2="${H / 2}" stroke="var(--grid)" stroke-width="1"/>
-    <line x1="${x(lo)}" x2="${x(hi)}" y1="${H / 2}" y2="${H / 2}" stroke="${color}" stroke-width="2.5" stroke-linecap="round" opacity=".45"/>
-    <circle cx="${x(m.mae)}" cy="${H / 2}" r="4.5" fill="${color}" stroke="var(--surface)" stroke-width="2"/></svg>`;
+    <line x1="0" x2="${W}" y1="${H / 2}" y2="${H / 2}" stroke="var(--hair)"/>
+    <line x1="${x(lo)}" x2="${x(hi)}" y1="${H / 2}" y2="${H / 2}" stroke="${c}" stroke-width="3" opacity=".35"/>
+    <rect x="${x(m.mae) - 2}" y="2" width="4" height="${H - 4}" fill="${c}"/></svg>`;
 }
 
 const COLS = {
   cal: [
-    ["rank", "#", false], ["name", "Model", true], ["mae", "Calorie error (kcal)", true], ["mae_pct", "Error %", true],
-    ["within20", "Within ±20%", true], ["bias", "Bias (kcal)", true], ["cost_per_100", "Cost / 100", true],
-    ["latency", "Latency", true], ["n", "Dishes", true],
+    [null, "#"], ["name", "Model"], ["mae", "Average error", "Average gap between the estimate and the weighed truth, in kcal. Range is the 95% confidence interval."],
+    ["within20", "Within 20%", "Share of plates estimated within 20% of the truth"], ["bias", "Bias", "Average signed error in kcal. Negative means the model tends to underestimate."],
+    ["cost_per_100", "Cost, 100 plates", "API cost at list prices"], ["latency", "Time per plate", "Median response time"],
   ],
   mac: [
-    ["rank", "#", false], ["name", "Model", true], ["mass", "Weight (g)", true], ["protein_g", "Protein (g)", true],
-    ["carbs_g", "Carbs (g)", true], ["fat_g", "Fat (g)", true], ["out_tokens", "Output tokens", true], ["reasoning_tokens", "Reasoning tokens", true],
+    [null, "#"], ["name", "Model"], ["mass", "Weight error (g)", "Average gap from the weighed weight, and that gap as a share of the average plate"],
+    ["protein_g", "Protein error (g)"], ["carbs_g", "Carb error (g)"], ["fat_g", "Fat error (g)"],
+    ["reasoning_tokens", "Reasoning tokens", "Average hidden reasoning tokens per plate"],
   ],
 };
 function sortVal(m, k) {
@@ -462,45 +441,41 @@ function sortVal(m, k) {
   return v == null ? Infinity : v;
 }
 function renderLB() {
-  const cols = COLS[lbTab];
+  const cols = COLS[view];
   const rows = [...models].sort((a, b) => {
     const va = sortVal(a, sortKey), vb = sortVal(b, sortKey);
     return (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
   });
-  const head = "<thead><tr>" + cols.map(([k, label, s]) =>
-    `<th class="${s ? "sortable" : ""}" data-k="${k}" ${s ? 'tabindex="0"' : ""}>${label}${sortKey === k ? `<span class="arrow">${sortDir > 0 ? "↑" : "↓"}</span>` : ""}</th>`).join("") + "</tr></thead>";
+  const head = "<thead><tr>" + cols.map(([k, label, title]) =>
+    `<th ${k ? `data-k="${k}" tabindex="0"` : ""} ${title ? `title="${esc(title)}"` : ""}>${label}${sortKey === k ? `<span class="dir">${sortDir > 0 ? "↑" : "↓"}</span>` : ""}</th>`).join("") + "</tr></thead>";
   const body = rows.map(m => {
     const r = rank[m.id];
-    const live = m.coverage < 1 ? `<span class="tag live" title="Run incomplete">${m.n}/${D.n_dishes}</span>` : "";
-    const who = `<div class="mname">${esc(m.name)}${m.baseline ? '<span class="tag">baseline</span>' : ""}${live}</div><div class="msub">${esc(m.baseline ? "ignores the photo" : m.lab)}</div>`;
-    const first = `<td>${r ? `<span class="rank ${r === 1 ? "r1" : ""}">${r}</span>` : "†"}</td><td>${who}</td>`;
+    const who = `<span class="mn">${esc(m.name)}</span><span class="lab">${esc(m.lab)}</span>`;
+    const lead = `<td class="rk">${r ?? ""}</td><td>${who}</td>`;
     let cells;
-    if (lbTab === "cal") {
-      cells = `<td><div class="ci-cell">${ciBar(m)}<span class="num">${f0(m.mae)}</span><span class="rng">${f0(m.mae_ci?.[0])}–${f0(m.mae_ci?.[1])}</span></div></td>
-        <td>${pct(m.mae_pct)}</td><td>${pct(m.within20)}</td><td>${signed(m.bias)}</td>
-        <td>${m.baseline ? "–" : usd(m.cost_per_100)}</td><td>${m.latency ? m.latency.toFixed(1) + "s" : "–"}</td><td>${m.n}</td>`;
+    if (view === "cal") {
+      cells = `<td><span class="ci">${ciBar(m)}<span class="big">${f0(m.mae)}</span><span class="r">${f0(m.mae_ci?.[0])}–${f0(m.mae_ci?.[1])}</span></span></td>
+        <td>${pct(m.within20)}</td><td>${signed(m.bias)}</td>
+        <td>${usd(m.cost_per_100)}</td><td>${m.latency ? m.latency.toFixed(1) + " s" : ""}</td>`;
     } else {
-      const mc = k => m.macros?.[k] ? `${m.macros[k].mae.toFixed(k === "mass_g" ? 0 : 1)} <span class="msub">(${pct(m.macros[k].pct)})</span>` : "–";
-      cells = `<td>${mc("mass_g")}</td><td>${mc("protein_g")}</td><td>${mc("carbs_g")}</td><td>${mc("fat_g")}</td>
-        <td>${m.baseline ? "–" : f0(m.out_tokens)}</td><td>${m.baseline ? "–" : f0(m.reasoning_tokens)}</td>`;
+      const mc = (k, dp) => m.macros?.[k] ? `${m.macros[k].mae.toFixed(dp)} <span class="lab">${pct(m.macros[k].pct)}</span>` : "";
+      cells = `<td>${mc("mass_g", 0)}</td><td>${mc("protein_g", 1)}</td><td>${mc("carbs_g", 1)}</td><td>${mc("fat_g", 1)}</td>
+        <td>${f0(m.reasoning_tokens)}</td>`;
     }
-    return `<tr class="${m.baseline ? "baseline" : ""}">${first}${cells}</tr>`;
+    return `<tr>${lead}${cells}</tr>`;
   }).join("");
   $("#lb").innerHTML = head + "<tbody>" + body + "</tbody>";
-  $("#lb-foot").innerHTML = lbTab === "cal"
-    ? "<b>Error %</b>: error as a share of the average plate. <b>Within ±20%</b>: share of plates within the FDA's nutrition-label tolerance. <b>Bias</b>: average signed error (negative = underestimates). <b>Cost</b>: actual API spend at list prices. † Baselines always guess the training-set average and are not ranked."
-    : "Mean absolute error per plate, with the error as a share of the average true value in parentheses (the metric used in the Nutrition5k paper). Tokens are per plate; reasoning tokens are part of output.";
-  $("#lb").querySelectorAll("th.sortable").forEach(th => {
+  $("#lb").querySelectorAll("th[data-k]").forEach(th => {
     const go = () => { const k = th.dataset.k; sortDir = sortKey === k ? -sortDir : (k === "within20" ? -1 : 1); sortKey = k; renderLB(); };
     th.addEventListener("click", go);
     th.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
   });
 }
-$("#lb-tabs").addEventListener("click", e => {
+document.querySelector(".switch").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
-  lbTab = b.dataset.tab;
-  $("#lb-tabs").querySelectorAll("button").forEach(x => x.setAttribute("aria-selected", x === b));
-  if (!COLS[lbTab].some(c => c[0] === sortKey)) { sortKey = lbTab === "cal" ? "mae" : "mass"; sortDir = 1; }
+  view = b.dataset.view;
+  document.querySelectorAll(".switch button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  if (!COLS[view].some(c => c[0] === sortKey)) { sortKey = view === "cal" ? "mae" : "mass"; sortDir = 1; }
   renderLB();
 });
 
@@ -533,7 +508,6 @@ function showTip(html, x, y) {
   tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, top) + "px";
 }
 function hideTip() { tip.classList.remove("on"); }
-// nearest-point hover layer over a plot
 function hoverLayer(svg, pts, onHover, onClick) {
   const pick = e => {
     const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal, sx = vb.width / r.width;
@@ -546,12 +520,11 @@ function hoverLayer(svg, pts, onHover, onClick) {
   svg.addEventListener("mouseleave", hideTip);
   if (onClick) svg.addEventListener("click", e => { const p = pick(e); if (p) onClick(p); });
 }
-// greedy label placement to avoid collisions
 function placeLabels(items, bounds, occupied = []) {
   const boxes = [...occupied];
   const overlaps = b => boxes.some(o => b.x < o.x + o.w && b.x + b.w > o.x && b.y < o.y + o.h && b.y + b.h > o.y);
   for (const it of items) {
-    const w = it.text.length * 6.6 + 4, h = 14;
+    const w = it.text.length * 7 + 4, h = 14;
     const cands = [[it.x + 10, it.y - 7], [it.x - 10 - w, it.y - 7], [it.x - w / 2, it.y - 22], [it.x - w / 2, it.y + 9],
                    [it.x + 10, it.y - 20], [it.x + 10, it.y + 6], [it.x - 10 - w, it.y - 20], [it.x - 10 - w, it.y + 6]];
     for (const [x, y] of cands) {
@@ -562,202 +535,221 @@ function placeLabels(items, bounds, occupied = []) {
   }
   return items;
 }
+function axisY(svg, M, H, text) {
+  const cy = (M.t + H - M.b) / 2;
+  el("text", {x: 12, y: cy, transform: `rotate(-90 12 ${cy})`, "text-anchor": "middle", class: "axis-title"}, svg).textContent = text;
+}
 
-// ---------- chart: accuracy vs cost
+// ---------- accuracy vs cost: quadrant chart, better is up and to the left
 function renderCost() {
   const host = $("#chart-cost"); host.innerHTML = "";
   const pts = real.filter(m => m.cost_per_100 > 0);
-  if (!pts.length) { host.innerHTML = '<div class="empty">No paid model results yet.</div>'; return; }
-  const W = Math.max(320, host.clientWidth), H = Math.round(Math.min(440, Math.max(300, W * 0.62)));
-  const M = {t: 16, r: 18, b: 44, l: 52};
-  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Scatter of calorie error against cost per 100 dishes"}, host);
-  const costs = pts.map(m => m.cost_per_100);
+  if (!pts.length) { host.innerHTML = '<div class="empty">No results yet.</div>'; return; }
+  const W = Math.max(320, host.clientWidth), H = Math.round(Math.min(480, Math.max(320, W * 0.72)));
+  const M = {t: 14, r: 16, b: 46, l: 52};
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Average calorie error against cost for 100 plates"}, host);
+  const costs = pts.map(m => m.cost_per_100), errs = pts.map(m => m.mae);
   let x0 = Math.min(...costs) / 1.8, x1 = Math.max(...costs) * 1.8;
   if (x1 / x0 < 12) { const c = Math.sqrt(x0 * x1); x0 = c / 3.5; x1 = c * 3.5; }
-  const yMax = Math.max(...pts.map(m => m.mae), base ? base.mae : 0) * 1.2;
+  const yMax = Math.max(...errs) * 1.18;
   const X = v => M.l + (Math.log10(v) - Math.log10(x0)) / (Math.log10(x1) - Math.log10(x0)) * (W - M.l - M.r);
-  const Y = v => M.t + (v / yMax) * (H - M.t - M.b);   // 0 at top: up is better
+  const Y = v => M.t + (v / yMax) * (H - M.t - M.b);   // 0 error at the top
+  const L = M.l, R = W - M.r, T = M.t, B = H - M.b;
+
+  // quadrants split at the middle of the cost range (log) and the middle of the error range
+  const xm = X(Math.sqrt(Math.min(...costs) * Math.max(...costs)));
+  const ym = Y((Math.min(...errs) + Math.max(...errs)) / 2);
+  el("rect", {x: L, y: T, width: xm - L, height: ym - T, fill: "var(--q-good)"}, svg);
+  el("rect", {x: xm, y: ym, width: R - xm, height: B - ym, fill: "var(--q-bad)"}, svg);
+  el("text", {x: xm - 8, y: T + 18, "text-anchor": "end", class: "q-label", fill: "var(--q-good-ink)"}, svg).textContent = "Efficient";
+  el("text", {x: xm + 8, y: B - 10, class: "q-label", fill: "var(--q-bad-ink)"}, svg).textContent = "Inefficient";
+
   for (const v of niceTicks(0, yMax, 5)) {
-    el("line", {x1: M.l, x2: W - M.r, y1: Y(v), y2: Y(v), stroke: "var(--grid)"}, svg);
-    el("text", {x: M.l - 8, y: Y(v) + 4, "text-anchor": "end", class: "tick"}, svg).textContent = v;
+    el("line", {x1: L, x2: R, y1: Y(v), y2: Y(v), stroke: "var(--hair)", "stroke-opacity": .6}, svg);
+    el("text", {x: L - 8, y: Y(v) + 4, "text-anchor": "end", class: "tick"}, svg).textContent = v;
   }
-  for (const v of logTicks(x0, x1)) {
-    el("line", {x1: X(v), x2: X(v), y1: M.t, y2: H - M.b, stroke: "var(--grid)"}, svg);
-    el("text", {x: X(v), y: H - M.b + 18, "text-anchor": "middle", class: "tick"}, svg).textContent = "$" + (v < 1 ? v : v.toFixed(0));
-  }
-  el("text", {x: (M.l + W - M.r) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "API cost for all 100 dishes (USD)";
-  el("text", {x: 14, y: (M.t + H - M.b) / 2, transform: `rotate(-90 14 ${(M.t + H - M.b) / 2})`, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "Calorie error (kcal) · lower is better";
+  for (const v of logTicks(x0, x1))
+    el("text", {x: X(v), y: B + 18, "text-anchor": "middle", class: "tick"}, svg).textContent = "$" + (v < 1 ? v : v.toFixed(0));
+  el("line", {x1: L, x2: R, y1: B, y2: B, stroke: "var(--rule)", "stroke-width": 1.5}, svg);
+  el("text", {x: (L + R) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "Cost for 100 plates (log scale)";
+  axisY(svg, M, H, "Average error (kcal), lower is better");
+
+  // reference lines: most accurate model and cheapest model
   const occupied = [];
-  if (base) {
-    const txt = `Guess the average: ${f0(base.mae)} kcal`, by = Y(base.mae);
-    el("line", {x1: M.l, x2: W - M.r, y1: by, y2: by, stroke: "var(--axis)", "stroke-width": 1.5}, svg);
-    el("text", {x: M.l + 6, y: by + 16, class: "tick"}, svg).textContent = txt;
-    occupied.push({x: M.l + 4, y: by + 4, w: txt.length * 6.2 + 6, h: 15});
-  }
+  const best = Math.min(...errs), cheap = Math.min(...costs);
+  el("line", {x1: L, x2: R, y1: Y(best), y2: Y(best), stroke: "var(--muted)", "stroke-dasharray": "4 4"}, svg);
+  el("text", {x: R - 4, y: Y(best) - 6, "text-anchor": "end", class: "ref-label"}, svg).textContent = "Most accurate";
+  occupied.push({x: R - 96, y: Y(best) - 18, w: 94, h: 14});
+  el("line", {x1: X(cheap), x2: X(cheap), y1: T, y2: B, stroke: "var(--muted)", "stroke-dasharray": "4 4"}, svg);
+  const cy = B - 8;
+  el("text", {x: X(cheap) - 6, y: cy, transform: `rotate(-90 ${X(cheap) - 6} ${cy})`, class: "ref-label"}, svg).textContent = "Cheapest";
+  occupied.push({x: X(cheap) - 18, y: cy - 60, w: 14, h: 60});
+
+  // Pareto frontier: models no cheaper model beats on accuracy
   const sorted = [...pts].sort((a, b) => a.cost_per_100 - b.cost_per_100);
   const frontier = []; let bestErr = Infinity;
   for (const m of sorted) if (m.mae < bestErr) { frontier.push(m); bestErr = m.mae; }
   const onF = new Set(frontier.map(m => m.id));
   if (frontier.length > 1)
-    el("polyline", {points: frontier.map(m => `${X(m.cost_per_100)},${Y(m.mae)}`).join(" "), fill: "none", stroke: "var(--s1)", "stroke-width": 2, "stroke-linejoin": "round", opacity: .55}, svg);
+    el("polyline", {points: frontier.map(m => `${X(m.cost_per_100)},${Y(m.mae)}`).join(" "), fill: "none", stroke: "var(--mark)", "stroke-width": 2, opacity: .6}, svg);
   const items = pts.map(m => ({m, x: X(m.cost_per_100), y: Y(m.mae), text: m.name}));
   for (const it of items)
-    el("circle", {cx: it.x, cy: it.y, r: 6.5, fill: onF.has(it.m.id) ? "var(--s1)" : "var(--muted)", stroke: "var(--surface)", "stroke-width": 2}, svg);
-  placeLabels([...items].sort((a, b) => onF.has(b.m.id) - onF.has(a.m.id) || a.m.mae - b.m.mae), {x0: M.l, x1: W - M.r + 10, y0: M.t, y1: H - M.b}, occupied);
+    el("circle", {cx: it.x, cy: it.y, r: 7, fill: onF.has(it.m.id) ? "var(--mark)" : "var(--muted)", stroke: "var(--bg)", "stroke-width": 2}, svg);
+  placeLabels([...items].sort((a, b) => onF.has(b.m.id) - onF.has(a.m.id) || a.m.mae - b.m.mae), {x0: L, x1: R + 10, y0: T, y1: B}, occupied);
   for (const it of items) if (it.lx != null)
     el("text", {x: it.lx, y: it.ly, class: "pt-label" + (onF.has(it.m.id) ? "" : " dim")}, svg).textContent = it.text;
   hoverLayer(svg, items, (p, e) => showTip(
-    `<b>${esc(p.m.name)}</b> <span class="muted">${esc(p.m.lab)}</span><table>
-     <tr><td>Calorie error</td><td>${f0(p.m.mae)} kcal (${f0(p.m.mae_ci[0])}–${f0(p.m.mae_ci[1])})</td></tr>
-     <tr><td>Within ±20%</td><td>${pct(p.m.within20)}</td></tr>
-     <tr><td>Cost / 100 dishes</td><td>${usd(p.m.cost_per_100)}</td></tr>
-     <tr><td>Reasoning tokens</td><td>${f0(p.m.reasoning_tokens)} / dish</td></tr></table>`, e.clientX, e.clientY));
+    `<b>${esc(p.m.name)}</b><table>
+     <tr><td>Average error</td><td>${f0(p.m.mae)} kcal</td></tr>
+     <tr><td>95% range</td><td>${f0(p.m.mae_ci[0])}–${f0(p.m.mae_ci[1])}</td></tr>
+     <tr><td>Within 20%</td><td>${pct(p.m.within20)}</td></tr>
+     <tr><td>Cost, 100 plates</td><td>${usd(p.m.cost_per_100)}</td></tr></table>`, e.clientX, e.clientY));
 }
 
-// ---------- chart: bias
+// ---------- horizontal bar charts
+function hbars(host, rows, {domain, fmt, color, zeroAt}) {
+  host.innerHTML = "";
+  const W = Math.max(280, host.clientWidth), rowH = 30, labW = Math.min(170, W * 0.42), H = rows.length * rowH + 26;
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img"}, host);
+  const [lo, hi] = domain, X = v => labW + (v - lo) / (hi - lo) * (W - labW - 44);
+  for (const v of niceTicks(lo, hi, 4)) {
+    el("line", {x1: X(v), x2: X(v), y1: 2, y2: H - 22, stroke: v === zeroAt ? "var(--rule)" : "var(--hair)", "stroke-width": v === zeroAt ? 1.5 : 1}, svg);
+    el("text", {x: X(v), y: H - 6, "text-anchor": "middle", class: "tick"}, svg).textContent = fmt.tick(v);
+  }
+  rows.forEach((r, i) => {
+    const y = 6 + i * rowH, x0 = X(zeroAt), x1 = X(r.v);
+    el("text", {x: labW - 10, y: y + 12, "text-anchor": "end", class: "tick", style: "fill:var(--ink);font-size:13px"}, svg).textContent = r.label;
+    el("rect", {x: Math.min(x0, x1), y, width: Math.max(2, Math.abs(x1 - x0)), height: 16, fill: color(r)}, svg);
+    const right = r.v >= zeroAt;
+    el("text", {x: right ? Math.max(x0, x1) + 6 : Math.min(x0, x1) - 6, y: y + 12, "text-anchor": right ? "start" : "end", class: "tick", style: "fill:var(--ink-2)"}, svg).textContent = fmt.value(r.v);
+  });
+  return svg;
+}
 function renderBias() {
-  const host = $("#chart-bias"); host.innerHTML = "";
-  if (!real.length) { host.innerHTML = '<div class="empty">No results yet.</div>'; return; }
-  const W = Math.max(300, host.clientWidth), rowH = 30, labW = Math.min(150, W * 0.38);
-  const H = real.length * rowH + 34;
-  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Mean signed calorie error per model"}, host);
-  const lim = Math.max(40, ...real.map(m => Math.abs(m.bias))) * 1.25;
-  const X = v => labW + (v + lim) / (2 * lim) * (W - labW - 12);
-  for (const v of niceTicks(-lim, lim, 4)) {
-    el("line", {x1: X(v), x2: X(v), y1: 4, y2: H - 26, stroke: v === 0 ? "var(--axis)" : "var(--grid)", "stroke-width": v === 0 ? 1.5 : 1}, svg);
-    el("text", {x: X(v), y: H - 8, "text-anchor": "middle", class: "tick"}, svg).textContent = (v > 0 ? "+" : "") + v;
-  }
-  real.forEach((m, i) => {
-    const y = 8 + i * rowH, h = 16, x0 = X(0), x1 = X(m.bias);
-    el("text", {x: labW - 10, y: y + 12, "text-anchor": "end", class: "tick", style: "fill:var(--ink);font-size:12.5px"}, svg).textContent = m.name;
-    const w = Math.max(2, Math.abs(x1 - x0));
-    el("rect", {x: Math.min(x0, x1), y, width: w, height: h, rx: 3, fill: m.bias < 0 ? "var(--under)" : "var(--over)"}, svg);
-    const tx = m.bias < 0 ? Math.min(x0, x1) - 6 : Math.max(x0, x1) + 6;
-    el("text", {x: tx, y: y + 12, "text-anchor": m.bias < 0 ? "end" : "start", class: "tick", style: "fill:var(--ink-2)"}, svg).textContent = signed(m.bias);
+  const host = $("#chart-bias");
+  if (!real.length) { host.innerHTML = ""; return; }
+  const lim = Math.max(40, ...real.map(m => Math.abs(m.bias))) * 1.3;
+  const svg = hbars(host, real.map(m => ({label: m.name, v: m.bias})), {
+    domain: [-lim, lim], zeroAt: 0, color: r => r.v < 0 ? "var(--under)" : "var(--over)",
+    fmt: {tick: v => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v), value: v => signed(v) + " kcal"},
   });
+  const vb = svg.viewBox.baseVal, labW = Math.min(170, vb.width * 0.42);
+  const t1 = el("text", {x: labW, y: vb.height + 14, class: "tick"}, svg); t1.textContent = "← underestimates";
+  const t2 = el("text", {x: vb.width - 44, y: vb.height + 14, "text-anchor": "end", class: "tick"}, svg); t2.textContent = "overestimates →";
+  svg.setAttribute("height", vb.height + 20); svg.setAttribute("viewBox", `0 0 ${vb.width} ${vb.height + 20}`);
 }
-
-// ---------- chart: within ±20%
 function renderW20() {
-  const host = $("#chart-w20"); host.innerHTML = "";
-  const rows = [...real].sort((a, b) => b.within20 - a.within20);
-  if (base) rows.push(base);
-  const W = Math.max(300, host.clientWidth), rowH = 30, labW = Math.min(150, W * 0.38), H = rows.length * rowH + 30;
-  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Share of plates within 20 percent per model"}, host);
-  const X = v => labW + v * (W - labW - 44);
-  for (const v of [0, 0.25, 0.5, 0.75, 1]) {
-    el("line", {x1: X(v), x2: X(v), y1: 4, y2: H - 24, stroke: v === 0 ? "var(--axis)" : "var(--grid)"}, svg);
-    el("text", {x: X(v), y: H - 6, "text-anchor": "middle", class: "tick"}, svg).textContent = Math.round(v * 100) + "%";
-  }
-  rows.forEach((m, i) => {
-    const y = 8 + i * rowH;
-    el("text", {x: labW - 10, y: y + 12, "text-anchor": "end", class: "tick", style: `fill:var(${m.baseline ? "--ink-2" : "--ink"});font-size:12.5px`}, svg).textContent = m.baseline ? "Guess the average" : m.name;
-    el("rect", {x: X(0), y, width: Math.max(2, X(m.within20) - X(0)), height: 16, rx: 3, fill: m.baseline ? "var(--muted)" : "var(--s1)"}, svg);
-    el("text", {x: X(m.within20) + 6, y: y + 12, class: "tick", style: "fill:var(--ink-2)"}, svg).textContent = pct(m.within20);
+  const rows = [...real].sort((a, b) => b.within20 - a.within20).map(m => ({label: m.name, v: m.within20}));
+  hbars($("#chart-w20"), rows, {
+    domain: [0, 1], zeroAt: 0, color: () => "var(--mark)",
+    fmt: {tick: v => Math.round(v * 100) + "%", value: v => pct(v)},
   });
 }
 
-// ---------- chart: predicted vs true
+// ---------- estimates vs truth
 function fillModelSelect(sel, withNone, value) {
   const avail = real.filter(m => dishes.some(d => d.preds[m.id]));
-  sel.innerHTML = (withNone ? '<option value="">None</option>' : "") + avail.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join("");
+  sel.innerHTML = (withNone ? '<option value="">nothing</option>' : "") + avail.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join("");
   sel.value = value ?? (withNone ? "" : avail[0]?.id ?? "");
 }
 function renderPV() {
   const host = $("#chart-pv"); host.innerHTML = "";
   const a = $("#pv-a").value, b = $("#pv-b").value;
   const series = [a, b].filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i);
-  if (!series.length) { host.innerHTML = '<div class="empty">No predictions yet.</div>'; return; }
-  const W = Math.max(320, host.clientWidth), H = Math.round(Math.min(560, Math.max(320, W * 0.58)));
-  const M = {t: 14, r: 18, b: 44, l: 56};
-  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Predicted versus true calories per dish"}, host);
+  if (!series.length) { host.innerHTML = '<div class="empty">No estimates yet.</div>'; return; }
+  const W = Math.max(320, host.clientWidth), H = Math.round(Math.min(560, Math.max(320, W * 0.55)));
+  const M = {t: 10, r: 16, b: 46, l: 56};
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, height: H, role: "img", "aria-label": "Estimated against true calories for each plate"}, host);
   const maxTrue = Math.max(...dishes.map(d => d.kcal));
   const predMax = Math.max(...series.flatMap(id => dishes.map(d => d.preds[id]?.kcal ?? 0)));
   const vMax = Math.min(Math.max(maxTrue, predMax) * 1.05, maxTrue * 2.2);
   const X = v => M.l + (v / vMax) * (W - M.l - M.r);
   const Y = v => H - M.b - (Math.min(v, vMax) / vMax) * (H - M.t - M.b);
   for (const v of niceTicks(0, vMax, 6)) {
-    el("line", {x1: M.l, x2: W - M.r, y1: Y(v), y2: Y(v), stroke: "var(--grid)"}, svg);
+    el("line", {x1: M.l, x2: W - M.r, y1: Y(v), y2: Y(v), stroke: "var(--hair)"}, svg);
     el("text", {x: M.l - 8, y: Y(v) + 4, "text-anchor": "end", class: "tick"}, svg).textContent = v;
     el("text", {x: X(v), y: H - M.b + 18, "text-anchor": "middle", class: "tick"}, svg).textContent = v;
   }
-  const wedge = [[0, 0], [vMax, vMax * 1.2], [vMax, vMax * 0.8]].map(([x, y]) => `${X(x)},${Y(y)}`);
-  el("polygon", {points: wedge.join(" "), fill: "var(--band)"}, svg);
-  el("line", {x1: X(0), y1: Y(0), x2: X(vMax), y2: Y(vMax), stroke: "var(--axis)", "stroke-width": 1.5}, svg);
-  el("text", {x: X(vMax * 0.97), y: Y(vMax * 0.97) - 8, "text-anchor": "end", class: "tick"}, svg).textContent = "perfect";
-  el("text", {x: (M.l + W - M.r) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "True calories (kcal, from weighed ingredients)";
-  el("text", {x: 14, y: (M.t + H - M.b) / 2, transform: `rotate(-90 14 ${(M.t + H - M.b) / 2})`, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "Predicted calories (kcal)";
+  el("polygon", {points: [[0, 0], [vMax, vMax * 1.2], [vMax, vMax * 0.8]].map(([x, y]) => `${X(x)},${Y(y)}`).join(" "), fill: "var(--band)"}, svg);
+  el("line", {x1: X(0), y1: Y(0), x2: X(vMax), y2: Y(vMax), stroke: "var(--rule)", "stroke-width": 1}, svg);
+  el("line", {x1: M.l, x2: W - M.r, y1: Y(0), y2: Y(0), stroke: "var(--rule)", "stroke-width": 1.5}, svg);
+  el("text", {x: X(vMax) - 4, y: Y(vMax) + 16, "text-anchor": "end", class: "tick"}, svg).textContent = "exactly right";
+  el("text", {x: (M.l + W - M.r) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title"}, svg).textContent = "True calories";
+  axisY(svg, M, H, "Estimated calories");
   const pts = [];
   series.forEach((id, si) => {
-    const color = si === 0 ? "var(--s1)" : "var(--s2)";
+    const color = si === 0 ? "var(--mark)" : "var(--mark-2)";
     for (const d of dishes) {
       const p = d.preds[id]; if (!p) continue;
       const v = p.kcal ?? 0, clipped = v > vMax;
-      const pt = {x: X(d.kcal), y: Y(v), d, id};
-      el("circle", {cx: pt.x, cy: pt.y, r: 4.5, fill: clipped ? "var(--surface)" : color, stroke: clipped ? color : "var(--surface)", "stroke-width": clipped ? 2 : 1.5, opacity: .9}, svg);
+      const pt = {x: X(d.kcal), y: Y(v), d};
+      el("circle", {cx: pt.x, cy: pt.y, r: 4.5, fill: clipped ? "var(--bg)" : color, stroke: clipped ? color : "var(--bg)", "stroke-width": clipped ? 2 : 1.5}, svg);
       pts.push(pt);
     }
   });
   hoverLayer(svg, pts, (p, e) => {
-    const rows = series.map(id => { const pr = p.d.preds[id]; return `<tr><td>${esc(byId[id].name)}</td><td>${pr?.kcal != null ? f0(pr.kcal) + " kcal" : "failed"}</td></tr>`; }).join("");
-    showTip(`<img src="${p.d.thumb}" alt=""><b>True: ${f0(p.d.kcal)} kcal</b> <span class="muted">${f0(p.d.mass)} g</span><table>${rows}</table><div class="muted">Click to open</div>`, e.clientX, e.clientY);
+    const rows = series.map(id => { const pr = p.d.preds[id]; return `<tr><td>${esc(byId[id].name)}</td><td>${pr?.kcal != null ? f0(pr.kcal) : "failed"}</td></tr>`; }).join("");
+    showTip(`<img src="${p.d.thumb}" alt=""><table><tr><td><b>True</b></td><td><b>${f0(p.d.kcal)}</b></td></tr>${rows}</table>`, e.clientX, e.clientY);
   }, p => openDish(p.d.id));
-  $("#pv-legend").innerHTML = series.map((id, i) => `<span><i style="background:${i ? "var(--s2)" : "var(--s1)"}"></i>${esc(byId[id].name)} · ${f0(byId[id].mae)} kcal avg error</span>`).join("") +
-    '<span><i style="background:var(--band);border-radius:2px"></i>within ±20%</span>';
+  $("#pv-key").innerHTML = series.map((id, i) => `<span><i style="background:${i ? "var(--mark-2)" : "var(--mark)"}"></i>${esc(byId[id].name)}</span>`).join("") +
+    '<span><i style="background:var(--band);border-radius:0"></i>within 20% of the truth</span>';
 }
 
-// ---------- dish explorer
+// ---------- plates
 let showAll = false;
-function renderGrid() {
+function renderGallery() {
   const mid = $("#dx-model").value, mode = $("#dx-sort").value;
   const errOf = d => { const p = d.preds[mid]; return p ? Math.abs((p.kcal ?? 0) - d.kcal) / d.kcal : -1; };
   const list = [...dishes].sort({
     hard: (a, b) => b.hard - a.hard, err: (a, b) => errOf(b) - errOf(a), disagree: (a, b) => b.disagree - a.disagree,
     "kcal-desc": (a, b) => b.kcal - a.kcal, "kcal-asc": (a, b) => a.kcal - b.kcal, index: (a, b) => a.i - b.i,
   }[mode]);
-  const shown = showAll ? list : list.slice(0, 24);
-  $("#grid").innerHTML = shown.map(d => {
+  const shown = showAll ? list : list.slice(0, 20);
+  $("#gallery").innerHTML = shown.map(d => {
     const p = d.preds[mid];
-    const pred = p ? (p.kcal != null ? `${f0(p.kcal)} kcal` : "") : "not run";
-    return `<button class="dish" data-id="${d.id}" aria-label="Dish with ${f0(d.kcal)} kcal">
-      <div class="ph"><img loading="lazy" src="${d.thumb}" alt=""><span class="truth">${f0(d.kcal)} kcal</span></div>
-      <div class="meta"><span class="pred">${pred}</span>${p ? errBadge(p.kcal, d.kcal) : ""}</div></button>`;
+    const guess = p ? (p.kcal != null ? `guessed ${f0(p.kcal)}` : "no answer") : "";
+    return `<button class="plate" data-id="${d.id}" aria-label="Plate with ${f0(d.kcal)} calories">
+      <img loading="lazy" src="${d.thumb}" alt="">
+      <div class="cap"><span class="t">${f0(d.kcal)} kcal</span>${p ? errMark(p.kcal, d.kcal) : ""}</div>
+      <div class="g">${guess}</div></button>`;
   }).join("");
   $("#more").style.display = showAll ? "none" : "block";
 }
-$("#grid").addEventListener("click", e => { const b = e.target.closest(".dish"); if (b) openDish(b.dataset.id); });
-$("#more").addEventListener("click", () => { showAll = true; renderGrid(); });
+$("#gallery").addEventListener("click", e => { const b = e.target.closest(".plate"); if (b) openDish(b.dataset.id); });
+$("#more").addEventListener("click", () => { showAll = true; renderGallery(); });
 
-// ---------- modal
+// ---------- plate detail
 function openDish(id) {
   const d = dishById[id]; if (!d) return;
-  const ingr = d.ingredients.slice(0, 16).map(([n, g]) => `<li>${esc(n)} <span class="msub">${f0(g)} g</span></li>`).join("") +
-    (d.ingredients.length > 16 ? `<li class="msub">+${d.ingredients.length - 16} more</li>` : "");
+  const ingr = d.ingredients.slice(0, 16).map(([n, g]) => `<li>${esc(n)}, ${f0(g)} g</li>`).join("") +
+    (d.ingredients.length > 16 ? `<li>and ${d.ingredients.length - 16} more</li>` : "");
   const rows = real.filter(m => d.preds[m.id]).map(m => {
     const p = d.preds[m.id];
-    const items = (p.items || []).map(([n, g, c]) => `<li>${esc(n)} — ${f0(g)} g, ${f0(c)} kcal</li>`).join("");
-    return `<tr><td><b>${esc(m.name)}</b><div class="msub">${esc(m.lab)}</div></td>
-      <td class="n">${p.kcal != null ? f0(p.kcal) : "–"}</td><td class="n">${errBadge(p.kcal, d.kcal)}</td><td class="n">${p.mass != null ? f0(p.mass) + " g" : "–"}</td>
-      <td>${items ? `<details><summary>${p.items.length} item${p.items.length === 1 ? "" : "s"}</summary><ul>${items}</ul></details>` : `<span class="msub">${esc(p.status || "")}</span>`}</td></tr>`;
+    const items = (p.items || []).map(([n, g, c]) => `<li>${esc(n)}: ${f0(g)} g, ${f0(c)} kcal</li>`).join("");
+    return `<tr><td><b>${esc(m.name)}</b></td><td class="n">${p.kcal != null ? f0(p.kcal) : "–"}</td><td class="n">${errMark(p.kcal, d.kcal)}</td>
+      <td class="n">${p.mass != null ? f0(p.mass) + " g" : "–"}</td>
+      <td>${items ? `<details><summary>${p.items.length} item${p.items.length === 1 ? "" : "s"}</summary><ul>${items}</ul></details>` : esc(p.status || "")}</td></tr>`;
   }).join("");
   $("#m-body").innerHTML = `<div class="mgrid">
     <div><img class="mimg" src="${esc(d.image)}" onerror="this.src='${d.thumb}'" alt="Overhead photo of the plate">
-      <p class="foot">Dish ${esc(d.id)} · #${d.i + 1} in the benchmark</p></div>
-    <div><h2 id="m-title">${f0(d.kcal)} kcal</h2>
+      <div class="src">Nutrition5k ${esc(d.id)}</div></div>
+    <div>
       <div class="facts">
-        <div class="fact"><div class="k">Calories</div><div class="v">${f0(d.kcal)}</div></div>
-        <div class="fact"><div class="k">Weight</div><div class="v">${f0(d.mass)} g</div></div>
-        <div class="fact"><div class="k">Protein</div><div class="v">${d.p?.toFixed(0)} g</div></div>
-        <div class="fact"><div class="k">Carbs</div><div class="v">${d.c?.toFixed(0)} g</div></div>
-        <div class="fact"><div class="k">Fat</div><div class="v">${d.f?.toFixed(0)} g</div></div>
+        <p class="title" id="m-title">Nutrition Facts</p>
+        <div class="row"><span>Serving size</span><b>${f0(d.mass)} g</b></div>
+        <div class="row kcal"><span>Calories</span><span>${f0(d.kcal)}</span></div>
+        <div class="row"><span><b>Total fat</b></span><span>${d.f?.toFixed(1)} g</span></div>
+        <div class="row"><span><b>Total carbohydrate</b></span><span>${d.c?.toFixed(1)} g</span></div>
+        <div class="row"><span><b>Protein</b></span><span>${d.p?.toFixed(1)} g</span></div>
       </div>
-      <h3>Weighed ingredients</h3><ul class="ingr">${ingr}</ul></div></div>
-    <h3 style="margin-top:20px">What the models said</h3>
-    ${rows ? `<div class="table-wrap" style="margin:0"><table class="ptable"><thead><tr><th>Model</th><th style="text-align:right">kcal</th><th style="text-align:right">Error</th><th style="text-align:right">Weight</th><th>Itemized guess</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<p class="msub">No predictions for this dish yet.</p>'}`;
+      <div class="ingr"><h3>Weighed ingredients</h3><ul>${ingr}</ul></div>
+    </div></div>
+    <h3 style="margin-top:26px">What each model said</h3>
+    ${rows ? `<div class="scroll"><table class="ptable"><thead><tr><th>Model</th><th class="n">kcal</th><th class="n">Off by</th><th class="n">Weight</th><th>Foods it saw</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<p class="src">No estimates for this plate yet.</p>'}`;
   const m = $("#modal"); m.classList.add("on"); m.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden"; hideTip();
   history.replaceState(null, "", "#dish=" + id);
-  $(".close", m).focus();
+  $(".x", m).focus();
 }
 function closeDish() {
   const m = $("#modal"); m.classList.remove("on"); m.setAttribute("aria-hidden", "true");
@@ -773,11 +765,12 @@ fillModelSelect($("#pv-b"), true, real[1]?.id ?? "");
 fillModelSelect($("#dx-model"), false, real[0]?.id);
 $("#pv-a").addEventListener("change", renderPV);
 $("#pv-b").addEventListener("change", renderPV);
-$("#dx-model").addEventListener("change", renderGrid);
-$("#dx-sort").addEventListener("change", renderGrid);
+$("#dx-model").addEventListener("change", renderGallery);
+$("#dx-sort").addEventListener("change", renderGallery);
 
 function renderCharts() { renderCost(); renderBias(); renderW20(); renderPV(); }
-renderLB(); renderCharts(); renderGrid();
+renderLB(); renderCharts(); renderGallery();
+document.fonts?.ready.then(renderCharts);
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(renderCharts, 120); });
 if (location.hash.startsWith("#dish=")) openDish(location.hash.slice(6));
 })();

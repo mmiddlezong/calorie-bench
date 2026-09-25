@@ -7,7 +7,7 @@ from caloriebench.prompt import PROMPT
 from caloriebench.providers import make_provider
 from caloriebench.providers.base import Usage
 
-KNOWN_PROVIDERS = {"anthropic", "openai", "google", "xai", "openrouter", "openai_chat", "baseline"}
+KNOWN_PROVIDERS = {"anthropic", "openai", "google", "xai", "openrouter", "openai_chat"}
 
 
 def test_registry_is_valid():
@@ -15,10 +15,9 @@ def test_registry_is_valid():
     assert reg.pricing_checked
     for m in reg.models:
         assert m.provider in KNOWN_PROVIDERS, m.id
-        if not m.is_baseline:
-            assert m.pricing.input > 0 and m.pricing.output > 0, f"{m.id} has no pricing"
-            assert m.estimate.image_tokens > 0, f"{m.id} has no image token estimate"
-            assert m.groups, f"{m.id} is in no group"
+        assert m.pricing.input > 0 and m.pricing.output > 0, f"{m.id} has no pricing"
+        assert m.estimate.image_tokens > 0, f"{m.id} has no image token estimate"
+        assert m.groups, f"{m.id} is in no group"
 
 
 def test_every_model_builds_a_request():
@@ -32,8 +31,8 @@ def test_every_model_builds_a_request():
 def test_group_selection():
     reg = load_registry()
     everything = reg.select(["all"])
-    assert everything and all(not m.is_baseline for m in everything)
-    assert {m.id for m in reg.select(["baselines"])} == {"train-mean", "train-median"}
+    assert len(everything) == len([m for m in reg.models if m.enabled])
+    assert {m.id for m in reg.select(["anthropic"])} >= {"claude-fable-5-1", "claude-haiku-4-5"}
     first = everything[0].id
     assert [m.id for m in reg.select([f"{first},{first}"])] == [first]
     with pytest.raises(KeyError):
@@ -65,8 +64,6 @@ def test_every_model_pins_reasoning_explicitly():
     """Policy: every model runs at high reasoning effort set explicitly in the request, so a
     change in a provider's default can never silently change results."""
     for m in load_registry().models:
-        if m.is_baseline:
-            continue
         req = make_provider(m).build_request(b"img", "image/png", PROMPT)
         if m.provider == "anthropic":
             effort = req.get("output_config", {}).get("effort")

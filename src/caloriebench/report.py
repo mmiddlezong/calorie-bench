@@ -51,8 +51,7 @@ def leaderboard_markdown(scores: list[ModelScore], registry: Registry | None, re
         "",
         f"_Generated {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}. "
         "Ranked by mean absolute calorie error (lower is better). 95% CIs from 10,000 "
-        "dish-level bootstrap resamples. Baseline rows (†) ignore the image and always guess "
-        "the training-set average dish._",
+        "dish-level bootstrap resamples._",
         "",
         "| # | Model | Calorie MAE, kcal (95% CI) | MAE % | Within ±20% | Median APE | MAPE "
         "| Bias (kcal) | r | Fail | Cost / 100 dishes | n |",
@@ -68,15 +67,11 @@ def leaderboard_markdown(scores: list[ModelScore], registry: Registry | None, re
                 spec = None
         meta = _meta(results_dir, s.model_id)
         name = (spec.display_name if spec else meta.get("display_name")) or s.model_id
-        is_baseline = bool(spec and spec.is_baseline)
         c = s.calories
         if not c:
             continue
-        if is_baseline:
-            label, rank_str = f"_{name}_ †", ""
-        else:
-            rank += 1
-            label, rank_str = f"**{name}**", str(rank)
+        rank += 1
+        label, rank_str = f"**{name}**", str(rank)
         lo, hi = c["mae_kcal_ci95"]
         cost = s.usage.get("cost_per_dish_usd", 0.0) * 100
         n = f"{s.n_dishes}/{s.n_total}" + ("" if s.coverage == 1 else " ⚠")
@@ -84,7 +79,7 @@ def leaderboard_markdown(scores: list[ModelScore], registry: Registry | None, re
             f"| {rank_str} | {label} | {c['mae_kcal']:.0f} ({lo:.0f}–{hi:.0f}) | {_pct(c['mae_pct_of_mean'], 0)} "
             f"| {_pct(c['within_20pct'], 0)} | {_pct(c['mdape'], 0)} | {_pct(c['mape'], 0)} "
             f"| {c['mean_signed_error_kcal']:+.0f} | {_num(c['pearson_r'])} "
-            f"| {_pct(s.failure_rate, 0)} | {'–' if is_baseline else f'${cost:.2f}'} | {n} |"
+            f"| {_pct(s.failure_rate, 0)} | ${cost:.2f} | {n} |"
         )
 
     lines += [
@@ -179,12 +174,6 @@ def readme_block(scores: list[ModelScore], registry: Registry | None) -> str:
         c = s.calories
         lo, hi = c["mae_kcal_ci95"]
         err = f"**{c['mae_kcal']:.0f} kcal** <sub>({lo:.0f}–{hi:.0f})</sub>"
-        if sp and sp.is_baseline:
-            lines.append(
-                f"| – | _{name}_ (baseline, ignores the photo) | {c['mae_kcal']:.0f} kcal "
-                f"| {_pct(c['within_20pct'], 0)} | {c['mean_signed_error_kcal']:+.0f} | – |"
-            )
-            continue
         rank += 1
         medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, str(rank))
         lab = f" <sub>{sp.lab}</sub>" if sp else ""

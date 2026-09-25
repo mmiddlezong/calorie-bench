@@ -1,0 +1,26 @@
+{
+  "model_id": "gpt-6-sol",
+  "prompt_version": "v1",
+  "prompt_hash": "cb252f13b2dfbd12",
+  "manifest_hash": "73c74f45f3af6c45",
+  "request_config": {
+    "provider": "openai",
+    "model": "gpt-6-sol",
+    "params": {
+      "reasoning_effort": "high"
+    },
+    "structured_output": true,
+    "max_output_tokens": 25000
+  },
+  "started_at": "2026-09-25T18:13:07+00:00",
+  "display_name": "GPT-6 Sol",
+  "lab": "OpenAI",
+  "pricing": {
+    "input": 2.0,
+    "output": 10.0,
+    "cached_input": 0.2
+  },
+  "caloriebench_version": "0.1.0",
+  "git_commit": "d4315d7",
+  "updated_at": "2026-09-25T18:17:19+00:00"
+}

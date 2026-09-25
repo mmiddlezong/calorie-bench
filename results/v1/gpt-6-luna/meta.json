@@ -1,0 +1,26 @@
+{
+  "model_id": "gpt-6-luna",
+  "prompt_version": "v1",
+  "prompt_hash": "cb252f13b2dfbd12",
+  "manifest_hash": "73c74f45f3af6c45",
+  "request_config": {
+    "provider": "openai",
+    "model": "gpt-6-luna",
+    "params": {
+      "reasoning_effort": "high"
+    },
+    "structured_output": true,
+    "max_output_tokens": 25000
+  },
+  "started_at": "2026-09-25T18:17:19+00:00",
+  "display_name": "GPT-6 Luna",
+  "lab": "OpenAI",
+  "pricing": {
+    "input": 0.1,
+    "output": 0.5,
+    "cached_input": 0.01
+  },
+  "caloriebench_version": "0.1.0",
+  "git_commit": "d4315d7-dirty",
+  "updated_at": "2026-09-25T18:19:40+00:00"
+}

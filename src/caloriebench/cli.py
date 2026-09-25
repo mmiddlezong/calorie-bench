@@ -119,7 +119,7 @@ def estimate(
 ) -> None:
     """Estimate API cost before running (no API calls are made)."""
     reg = load_registry()
-    specs = [s for s in reg.select(model_names) if not s.is_baseline]
+    specs = reg.select(model_names)
     n = len(load_dishes(limit)) * repeats
     if as_json:
         out = [estimate_cost(s, n).__dict__ for s in specs]
@@ -189,7 +189,7 @@ def run(
     if not specs:
         raise typer.Exit(1)
 
-    paid = [s for s in specs if not s.is_baseline]
+    paid = specs
     if paid and not yes:
         table, lo, ex, hi = _estimate_table(paid, len(dishes) * repeats)
         console.print(table)

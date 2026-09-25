@@ -5,7 +5,6 @@ benchmark run uses exactly the same dishes:
 
     data/manifest.jsonl    one line per dish: labels, ingredients, image URL + sha256
     data/subset_info.json  how the subset was selected (seed, filters, pool sizes)
-    data/baselines.json    trivial "guess the training-set average" predictors
 
 Selection procedure (all deterministic):
   1. Start from the official Nutrition5k RGB *test* split (so nothing overlaps the split
@@ -41,7 +40,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from caloriebench.paths import BASELINES_PATH, DATA_DIR, IMAGES_DIR, MANIFEST_PATH  # noqa: E402
+from caloriebench.paths import DATA_DIR, IMAGES_DIR, MANIFEST_PATH  # noqa: E402
 
 BUCKET = "https://storage.googleapis.com/nutrition5k_dataset/nutrition5k_dataset"
 LIST_API = "https://storage.googleapis.com/storage/v1/b/nutrition5k_dataset/o"
@@ -155,7 +154,6 @@ def main() -> None:
         meta = load_metadata(client)
         overhead = list_overhead_dishes(client)
         test_ids = read_split(client, "rgb_test_ids")
-        train_ids = read_split(client, "rgb_train_ids")
 
         test_pool = [i for i in test_ids if i in overhead and i in meta]
         eligible = [i for i in test_pool if label_ok(meta[i])]
@@ -212,15 +210,6 @@ def main() -> None:
             for t in TARGETS:
                 row[t] = round(row[t], 3)
             f.write(json.dumps(row) + "\n")
-
-    # Trivial baselines from the TRAIN split (same label filters, no test leakage).
-    train = [meta[i] for i in train_ids if i in overhead and i in meta and label_ok(meta[i])]
-    baselines = {
-        "source": f"Nutrition5k rgb_train split, overhead-photo dishes passing label filters (n={len(train)})",
-        "train-mean": {t: round(statistics.fmean(d[t] for d in train), 3) for t in TARGETS},
-        "train-median": {t: round(statistics.median(d[t] for d in train), 3) for t in TARGETS},
-    }
-    BASELINES_PATH.write_text(json.dumps(baselines, indent=2) + "\n")
 
     info = {
         "dataset": "Nutrition5k (Thames et al., CVPR 2021), https://github.com/google-research-datasets/Nutrition5k",

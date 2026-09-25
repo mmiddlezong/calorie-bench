@@ -57,16 +57,15 @@ def build_site(
             continue
         try:
             spec = registry.get(s.model_id)
-            name, lab, baseline, reasoning = spec.display_name, spec.lab, spec.is_baseline, spec.reasoning
+            name, lab, reasoning = spec.display_name, spec.lab, spec.reasoning
         except KeyError:
-            name, lab, baseline, reasoning = s.model_id, "", False, ""
+            name, lab, reasoning = s.model_id, "", ""
         c, u = s.calories, s.usage
         models.append(
             {
                 "id": s.model_id,
                 "name": name,
                 "lab": lab,
-                "baseline": baseline,
                 "reasoning": reasoning,
                 "n": s.n_dishes,
                 "coverage": _num(s.coverage, 3),
@@ -80,7 +79,7 @@ def build_site(
                 "mape": _num(c["mape"], 4),
                 "bias": _num(c["mean_signed_error_kcal"], 2),
                 "r": _num(c["pearson_r"], 3),
-                "cost_per_100": None if baseline else _num(u.get("cost_per_dish_usd", 0) * 100, 3),
+                "cost_per_100": _num(u.get("cost_per_dish_usd", 0) * 100, 3),
                 "total_cost": _num(u.get("total_cost_usd", 0), 4),
                 "latency": _num(u.get("median_latency_s"), 2),
                 "out_tokens": _num(u.get("mean_output_tokens"), 0),
@@ -93,8 +92,6 @@ def build_site(
 
     preds: dict[str, dict] = {d.dish_id: {} for d in dishes}
     for m in models:
-        if m["baseline"]:
-            continue
         for o in collect_outcomes(dishes, read_records(predictions_path(m["id"]))):
             rec = o.samples[0]
             p = rec.get("prediction") if rec.get("status") == "ok" else None

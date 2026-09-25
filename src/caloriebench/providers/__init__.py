@@ -26,8 +26,4 @@ def make_provider(spec: ModelSpec) -> Provider:
         from .google_provider import GoogleProvider
 
         return GoogleProvider(spec)
-    if spec.provider == "baseline":
-        from .baseline_provider import BaselineProvider
-
-        return BaselineProvider(spec)
     raise ValueError(f"Unknown provider {spec.provider!r} for model {spec.id}")

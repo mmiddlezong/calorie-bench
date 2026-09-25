@@ -256,18 +256,3 @@ models:
     reasoning: "reasoning explicitly enabled (no effort levels; default not documented)"
     pricing: {input: 0.30, output: 1.20}
     estimate: {image_tokens: 500, reasoning_tokens: 5900}  # AA MMMU-Pro: 5,875
-
-  # ------------------------------------------------------------------ Baselines (free, no API)
-  - id: train-mean
-    display_name: Train-set mean
-    lab: Baseline
-    provider: baseline
-    model: train-mean
-    groups: [baselines]
-
-  - id: train-median
-    display_name: Train-set median
-    lab: Baseline
-    provider: baseline
-    model: train-median
-    groups: [baselines]

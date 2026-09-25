@@ -21,7 +21,6 @@ ROOT = _find_root()
 DATA_DIR = ROOT / "data"
 MANIFEST_PATH = DATA_DIR / "manifest.jsonl"
 IMAGES_DIR = DATA_DIR / "images"
-BASELINES_PATH = DATA_DIR / "baselines.json"
 CONFIGS_DIR = ROOT / "configs"
 MODELS_PATH = CONFIGS_DIR / "models.yaml"
 PROMPTS_DIR = ROOT / "prompts"
