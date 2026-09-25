@@ -4,6 +4,10 @@ the /chat/completions dialect), via the official `openai` SDK with a base_url.
 Supported `params` in models.yaml:
   reasoning_effort: passed as `reasoning_effort` (only for models that accept it)
   image_detail:     low | high | auto (default: high)
+  max_tokens_param: name of the output-limit field. Default `max_tokens` for OpenRouter
+                    (the only one its endpoints advertise, which matters with
+                    `require_parameters: true`), `max_completion_tokens` otherwise
+                    (required by OpenAI reasoning models)
   extra_body:       dict sent as extra JSON body fields (e.g. OpenRouter `provider`
                     routing preferences or `reasoning` settings)
   extra:            dict merged into the request kwargs as-is
@@ -48,8 +52,9 @@ class OpenAIChatProvider(Provider):
                     ],
                 }
             ],
-            "max_completion_tokens": self.spec.max_output_tokens,
         }
+        default_field = "max_tokens" if self.spec.provider == "openrouter" else "max_completion_tokens"
+        req[p.get("max_tokens_param", default_field)] = self.spec.max_output_tokens
         if self.spec.structured_output:
             req["response_format"] = {
                 "type": "json_schema",

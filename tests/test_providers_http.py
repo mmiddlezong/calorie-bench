@@ -281,7 +281,9 @@ async def test_openai_chat(httpserver, spec_factory, good_json, provider_name):
     assert body["response_format"]["type"] == "json_schema"
     assert body["response_format"]["json_schema"]["schema"] == OUTPUT_SCHEMA
     assert body["provider"] == {"sort": "price"}  # extra_body is merged into the JSON body
-    assert body["max_completion_tokens"] == spec.max_output_tokens
+    limit_field = "max_tokens" if provider_name == "openrouter" else "max_completion_tokens"
+    assert body[limit_field] == spec.max_output_tokens
+    assert ("max_completion_tokens" if provider_name == "openrouter" else "max_tokens") not in body
 
     assert parse_prediction(result.text).total_calories == 360
     assert result.usage.input_tokens == 800

@@ -165,7 +165,7 @@ def run(
 ) -> None:
     """Run models on the benchmark. Resumable: re-running only fills in missing dishes."""
     from .providers import make_provider
-    from .runner import run_model
+    from .runner import RunConfigMismatch, run_model
 
     reg = load_registry()
     specs = reg.select(model_names)
@@ -210,21 +210,29 @@ def run(
         ) as prog:
             task = prog.add_task(spec.id, total=None, spent="")
 
+            def on_start(n_todo: int, _task=task) -> None:
+                prog.update(_task, total=n_todo)
+
             def on_record(rec: dict, spent: float, _task=task) -> None:
                 prog.update(_task, advance=1, spent=f"${spent:.3f} · last: {rec['status']}")
 
-            summary = asyncio.run(
-                run_model(
-                    spec,
-                    dishes,
-                    repeats=repeats,
-                    concurrency=concurrency,
-                    max_cost=max_cost,
-                    fresh=fresh,
-                    on_record=on_record,
+            try:
+                summary = asyncio.run(
+                    run_model(
+                        spec,
+                        dishes,
+                        repeats=repeats,
+                        concurrency=concurrency,
+                        max_cost=max_cost,
+                        fresh=fresh,
+                        on_start=on_start,
+                        on_record=on_record,
+                    )
                 )
-            )
-            prog.update(task, total=summary.attempted)
+            except RunConfigMismatch as e:
+                any_failed = True
+                console.print(f"[red]{e}[/]")
+                continue
         statuses = ", ".join(f"{k}: {v}" for k, v in sorted(summary.statuses.items())) or "nothing to do"
         console.print(
             f"{spec.id}: {summary.skipped} already done, {summary.attempted} attempted "

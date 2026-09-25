@@ -131,6 +131,7 @@ async def run_model(
     max_cost: float | None = None,
     fresh: bool = False,
     results_dir: Path = RESULTS_DIR,
+    on_start=None,
     on_record=None,
 ) -> RunSummary:
     out_dir = run_dir(spec.id, results_dir)
@@ -158,6 +159,8 @@ async def run_model(
         }
     )
     meta_path.write_text(json.dumps(meta, indent=2) + "\n")
+    if on_start:
+        on_start(len(todo))
     if not todo:
         return summary
 

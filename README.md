@@ -41,7 +41,7 @@ Useful flags for `run`:
 | Flag | Effect |
 |---|---|
 | `-n, --limit N` | Use only the first N dishes. Any prefix is calorie-balanced, so `-n 10` gives one dish per calorie decile. |
-| `--max-cost 5` | Hard per-model spend cap in USD. The run stops before a request would exceed it. |
+| `--max-cost 5` | Per-model spend cap in USD. No new request starts once actual spend, plus the estimated cost of in-flight requests, would exceed it. |
 | `-c, --concurrency 8` | Parallel requests per model. |
 | `--dry-run` | Build one request per model and print it. Nothing is sent. |
 | `--repeats K` | K samples per dish, to measure run-to-run variance. |
