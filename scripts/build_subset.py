@@ -159,13 +159,14 @@ def main() -> None:
 
         test_pool = [i for i in test_ids if i in overhead and i in meta]
         eligible = [i for i in test_pool if label_ok(meta[i])]
-        print(f"test split: {len(test_ids)} | with overhead photo: {len(test_pool)} | "
-              f"pass label filters: {len(eligible)}")
+        print(
+            f"test split: {len(test_ids)} | with overhead photo: {len(test_pool)} | pass label filters: {len(eligible)}"
+        )
 
         kcal = np.array([meta[i]["calories"] for i in eligible])
         edges = np.quantile(kcal, np.linspace(0, 1, N_STRATA + 1))
         strata: list[list[str]] = [[] for _ in range(N_STRATA)]
-        for dish_id, k in zip(eligible, kcal):
+        for dish_id, k in zip(eligible, kcal, strict=True):
             s = min(int(np.searchsorted(edges, k, side="right")) - 1, N_STRATA - 1)
             strata[s].append(dish_id)
 

@@ -1,0 +1,35 @@
+# CalorieBench model registry (provisional — other labs added once pricing is verified)
+pricing_checked: "2026-09-25"
+
+defaults:
+  max_output_tokens: 16000
+  timeout_s: 600
+  estimate:
+    text_tokens: 330
+    output_tokens: 300
+
+models:
+  - id: claude-fable-5-1
+    display_name: Claude Fable 5.1
+    lab: Anthropic
+    provider: anthropic
+    model: claude-fable-5-1
+    groups: [frontier, anthropic]
+    params: {effort: high}
+    reasoning: "adaptive thinking (always on), effort=high (API default)"
+    pricing: {input: 10.00, output: 50.00}
+    estimate: {image_tokens: 410, reasoning_tokens: 1500}
+
+  - id: train-mean
+    display_name: Train-set mean
+    lab: Baseline
+    provider: baseline
+    model: train-mean
+    groups: [baselines]
+
+  - id: train-median
+    display_name: Train-set median
+    lab: Baseline
+    provider: baseline
+    model: train-median
+    groups: [baselines]

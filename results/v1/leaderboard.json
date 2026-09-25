@@ -1,0 +1,136 @@
+{
+  "prompt_version": "v1",
+  "generated_at": "2026-09-25T04:41:47+00:00",
+  "models": [
+    {
+      "model_id": "train-median",
+      "n_dishes": 100,
+      "n_total": 100,
+      "coverage": 1.0,
+      "failure_rate": 0.0,
+      "status_counts": {
+        "ok": 100
+      },
+      "calories": {
+        "mae_kcal": 156.5931,
+        "mae_kcal_ci95": [
+          132.587352,
+          182.22229000000002
+        ],
+        "mae_pct_of_mean": 0.5710868107706905,
+        "mae_pct_of_mean_ci95": [
+          0.5010880763898652,
+          0.6471852722191295
+        ],
+        "mape": 1.108607900007769,
+        "mape_ci95": [
+          0.8425603250013044,
+          1.4037122365455124
+        ],
+        "mdape": 0.48494227419476266,
+        "within_10pct": 0.09,
+        "within_20pct": 0.19,
+        "within_20pct_ci95": [
+          0.12,
+          0.27
+        ],
+        "within_30pct": 0.28,
+        "mean_signed_error_kcal": -36.22192,
+        "median_signed_pct_error": -0.04077903341275437,
+        "pearson_r": NaN
+      },
+      "secondary": {
+        "mass_g": {
+          "mae": 107.77,
+          "mae_pct_of_mean": 0.5151775897509441
+        },
+        "protein_g": {
+          "mae": 13.950320000000001,
+          "mae_pct_of_mean": 0.7125209793031451
+        },
+        "carbs_g": {
+          "mae": 14.14344,
+          "mae_pct_of_mean": 0.6731996527248911
+        },
+        "fat_g": {
+          "mae": 8.71783,
+          "mae_pct_of_mean": 0.6711242358480325
+        }
+      },
+      "usage": {
+        "total_cost_usd": 0.0,
+        "cost_per_dish_usd": 0.0,
+        "projected_cost_full_run_usd": 0.0,
+        "mean_input_tokens": 0.0,
+        "mean_output_tokens": 0.0,
+        "mean_reasoning_tokens": 0.0,
+        "median_latency_s": 0.001
+      }
+    },
+    {
+      "model_id": "train-mean",
+      "n_dishes": 100,
+      "n_total": 100,
+      "coverage": 1.0,
+      "failure_rate": 0.0,
+      "status_counts": {
+        "ok": 100
+      },
+      "calories": {
+        "mae_kcal": 158.0234,
+        "mae_kcal_ci95": [
+          134.949265,
+          182.74136174999998
+        ],
+        "mae_pct_of_mean": 0.5763030397453089,
+        "mae_pct_of_mean_ci95": [
+          0.4905014565432843,
+          0.6779424196972573
+        ],
+        "mape": 1.3169613436438996,
+        "mape_ci95": [
+          0.9841469087293895,
+          1.6833808110589328
+        ],
+        "mdape": 0.45459291350314573,
+        "within_10pct": 0.12,
+        "within_20pct": 0.24,
+        "within_20pct_ci95": [
+          0.16,
+          0.33
+        ],
+        "within_30pct": 0.32,
+        "mean_signed_error_kcal": 7.3460800000000015,
+        "median_signed_pct_error": 0.13482958526223146,
+        "pearson_r": NaN
+      },
+      "secondary": {
+        "mass_g": {
+          "mae": 113.58793999999997,
+          "mae_pct_of_mean": 0.5429893398346
+        },
+        "protein_g": {
+          "mae": 14.574959999999999,
+          "mae_pct_of_mean": 0.7444248427637621
+        },
+        "carbs_g": {
+          "mae": 14.51182,
+          "mae_pct_of_mean": 0.6907338090596156
+        },
+        "fat_g": {
+          "mae": 9.41011,
+          "mae_pct_of_mean": 0.7244179896827455
+        }
+      },
+      "usage": {
+        "total_cost_usd": 0.0,
+        "cost_per_dish_usd": 0.0,
+        "projected_cost_full_run_usd": 0.0,
+        "mean_input_tokens": 0.0,
+        "mean_output_tokens": 0.0,
+        "mean_reasoning_tokens": 0.0,
+        "median_latency_s": 0.001
+      }
+    }
+  ]
+}

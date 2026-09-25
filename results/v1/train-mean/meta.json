@@ -1,0 +1,24 @@
+{
+  "model_id": "train-mean",
+  "prompt_version": "v1",
+  "prompt_hash": "cb252f13b2dfbd12",
+  "manifest_hash": "73c74f45f3af6c45",
+  "request_config": {
+    "provider": "baseline",
+    "model": "train-mean",
+    "params": {},
+    "structured_output": true,
+    "max_output_tokens": 16000
+  },
+  "started_at": "2026-09-25T04:39:59+00:00",
+  "display_name": "Train-set mean",
+  "lab": "Baseline",
+  "pricing": {
+    "input": 0.0,
+    "output": 0.0,
+    "cached_input": null
+  },
+  "caloriebench_version": "0.1.0",
+  "git_commit": "0fe187b-dirty",
+  "updated_at": "2026-09-25T04:39:59+00:00"
+}
